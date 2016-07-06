@@ -22,7 +22,7 @@ class Main extends React.Component {
         <Overlay 
           visible = {this.state.overlay} />
         <Header 
-          toggleOverlay={this.toggleOverlay} />
+          toggleOverlay={this.toggleOverlay.bind(this)} />
         <Toolbar />
         <Editor 
           range={this.state.range}
