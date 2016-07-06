@@ -1,0 +1,10 @@
+{
+  "main": "index.js",
+  "name": "",
+  "license": "",
+  "author": "",
+  "private": true,
+  "dependencies": {
+    "lodash": "^4.13.1"
+  }
+}
