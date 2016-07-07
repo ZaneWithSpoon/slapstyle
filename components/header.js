@@ -3,7 +3,7 @@ var Header = React.createClass({
     return (
       <header style={headerStyle}>
         <p style={logo}>lightBeat</p>
-        <div style={loginStyle}>
+        <div style={loginStyle} onClick={this.props.toggleOverlay}>
           Sign In
         </div>
       </header>
