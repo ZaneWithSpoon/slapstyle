@@ -4,28 +4,26 @@ import Header from './header'
 import Toolbar from './toolbar'
 import Editor from './editor'
 import InstrumentPanel from './instrumentPanel'
-// import GoogleLogin from 'react-google-login'
 
 //creating empty measure for rendering editor view
-let division = 4
-let testMeasure = []
-for (let i = 0; i < division; i++)
+var division = 4
+var testMeasure = []
+for (var i = 0; i < division; i++)
   testMeasure.push([])
-for (let i = 0; i < division; i+=8)
+for (var i = 0; i < division; i+=8)
   testMeasure[i].push('kick')
 
-
-class Main extends React.Component {
-  render() {
+var Main = React.createClass({
+  render: function() {
     return (
       <site>
         <Overlay 
           visible={this.state.isModal} 
-          toggleOverlay={this.toggleOverlay.bind(this)} 
-          responseGoogle={this.responseGoogle.bind(this)}
-          responseFacebook={this.responseFacebook.bind(this)} />
+          toggleOverlay={this.toggleOverlay} 
+          responseGoogle={this.responseGoogle}
+          responseFacebook={this.responseFacebook} />
         <Header 
-          toggleOverlay={this.toggleOverlay.bind(this)} 
+          toggleOverlay={this.toggleOverlay} 
           isLoggedIn={this.state.isLoggedIn} />
         <Toolbar />
         <Editor 
@@ -35,31 +33,33 @@ class Main extends React.Component {
         <InstrumentPanel />
       </site>
     )
-  }
-  state = {
-    'isLoggedIn': false,
-    'isModal': false,
-    'testMeasure': testMeasure,
-    'division': division,
-    'range': ['kick', 'snare', 'tom', 'hat']
-  }
-  toggleOverlay() {
+  },
+  getInitialState: function() {
+    return {
+      'isLoggedIn': false,
+      'isModal': false,
+      'testMeasure': testMeasure,
+      'division': division,
+      'range': ['kick', 'snare', 'tom', 'hat']
+    }
+  },
+  toggleOverlay: function() {
     this.setState({ isModal: (this.state.isModal) ? false : true})
-  }
-  responseFacebook(response) {
+  },
+  responseFacebook: function(response) {
+    if(response.status !== 'unknown') {
+      this.toggleOverlay()
+      this.setState({isLoggedIn: true})
+    }
+    console.log(response)
+  },
+  responseGoogle: function(response) {
     if(response.status !== 'unknown') {
       this.toggleOverlay()
       this.setState({isLoggedIn: true})
     }
     console.log(response)
   }
-  responseGoogle(response) {
-    if(response.status !== 'unknown') {
-      this.toggleOverlay()
-      this.setState({isLoggedIn: true})
-    }
-    console.log(response)
-  }
-}
+})
 
 export default Main
