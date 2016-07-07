@@ -1,6 +1,5 @@
 var Overlay = React.createClass({
   render: function() {
-    console.log('overlay is ' + this.props.visible)
     if (this.props.visible === 'visible') {
       return (
         <div id='overlay' style={overlayStyle}>

@@ -3,7 +3,10 @@ var Toolbar = React.createClass({
     return (
       //changing div name moves off screen
       <div style={toolbarStyle}> 
-        <p style={play}>play</p>
+        <play style={playStyle} onClick={this.play}>
+          {/* TODO: img src not working */}
+          <img src='../assets/play.png' alt='play' /> 
+        </play>
       </div>
     )
   }
@@ -14,8 +17,11 @@ var toolbarStyle = {
   height: '3em',
   backgroundColor: '#30353a'
 }
-var play = {
+var playStyle = {
   margin: 0,
+  height: '100%',
+  width: '3em',
+  backgroundColor: 'black',
   fontSize: '1.75em'
 }
 

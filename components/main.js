@@ -6,7 +6,7 @@ import Editor from './editor'
 import InstrumentPanel from './instrumentPanel'
 
 //creating empty measure for rendering editor view
-let division = 8
+let division = 4
 let testMeasure = []
 for (let i = 0; i < division; i++)
   testMeasure.push([])
@@ -16,7 +16,6 @@ for (let i = 0; i < division; i+=8)
 
 class Main extends React.Component {
   render() {
-    console.log(this.state)
     return (
       <site>
         <Overlay 
