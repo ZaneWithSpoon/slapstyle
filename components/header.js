@@ -1,16 +1,36 @@
 var Header = React.createClass({
   render: function() {
-    return (
-      <header style={headerStyle}>
-        <p style={logo}>lightBeat</p>
-        <div style={loginStyle} onClick={this.props.toggleOverlay}>
-          Sign In
-        </div>
-      </header>
-    )
+    if (this.props.isLoggedIn) {
+      return (
+        <header style={headerStyle}>
+          <p style={logo}>lightBeat</p>
+          <div style={rightStyle}>
+            <p style={{float: 'left'}}>{this.props.user.username}</p>
+            <img src={this.props.user.photo} alt='prof' style={picStyle} />
+          </div>
+        </header>
+      )
+    } else {
+      return (
+        <header style={headerStyle}>
+          <p style={logo}>lightBeat</p>
+          <div style={loginStyle} onClick={this.props.toggleOverlay}>
+            Sign In
+          </div>
+        </header>
+      )
+    }
   }
 })
 
+var rightStyle = {
+  float: 'right',
+  height: '100%'
+}
+var picStyle = {
+  height: '90%',
+  marginLeft: '8px'
+}
 var headerStyle = {
   width: '100%',
   height: '3em'

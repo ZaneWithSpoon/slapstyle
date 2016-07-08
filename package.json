@@ -5,9 +5,12 @@
   "author": "",
   "private": true,
   "dependencies": {
+    "ajax": "0.0.4",
     "lodash": "^4.13.1",
     "react": "^15.2.0",
+    "react-addons-css-transition-group": "^15.2.0",
     "react-facebook-login": "^3.1.0",
-    "react-google-login": "^2.1.2"
+    "react-google-login": "^2.1.2",
+    "validator": "^5.4.0"
   }
 }

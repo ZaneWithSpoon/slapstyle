@@ -5,6 +5,7 @@ import Toolbar from './toolbar'
 import Editor from './editor'
 import InstrumentPanel from './instrumentPanel'
 
+
 //creating empty measure for rendering editor view
 var division = 4
 var testMeasure = []
@@ -20,11 +21,11 @@ var Main = React.createClass({
         <Overlay 
           visible={this.state.isModal} 
           toggleOverlay={this.toggleOverlay} 
-          responseGoogle={this.responseGoogle}
-          responseFacebook={this.responseFacebook} />
+          signIn={this.signIn} />
         <Header 
           toggleOverlay={this.toggleOverlay} 
-          isLoggedIn={this.state.isLoggedIn} />
+          isLoggedIn={this.state.isLoggedIn} 
+          user={this.state.user} />
         <Toolbar />
         <Editor 
           range={this.state.range}
@@ -36,29 +37,24 @@ var Main = React.createClass({
   },
   getInitialState: function() {
     return {
-      'isLoggedIn': false,
-      'isModal': false,
-      'testMeasure': testMeasure,
-      'division': division,
-      'range': ['kick', 'snare', 'tom', 'hat']
+      user: {},
+      isLoggedIn: false,
+      isModal: false,
+      testMeasure: testMeasure,
+      division: division,
+      range: ['kick', 'snare', 'tom', 'hat']
     }
   },
   toggleOverlay: function() {
     this.setState({ isModal: (this.state.isModal) ? false : true})
   },
-  responseFacebook: function(response) {
-    if(response.status !== 'unknown') {
-      this.toggleOverlay()
-      this.setState({isLoggedIn: true})
-    }
-    console.log(response)
-  },
-  responseGoogle: function(response) {
-    if(response.status !== 'unknown') {
-      this.toggleOverlay()
-      this.setState({isLoggedIn: true})
-    }
-    console.log(response)
+  signIn: function(user) {
+    console.log(user)
+    this.setState({
+      user: user, 
+      isLoggedIn: true, 
+      isModal: false
+    })
   }
 })
 
