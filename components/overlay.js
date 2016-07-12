@@ -2,7 +2,6 @@ import GoogleLogin from 'react-google-login'
 import FacebookLogin from 'react-facebook-login'
 import validator from 'validator'
 
-
 var Overlay = React.createClass({
   render: function() {
     if (this.props.visible && !this.state.newUser) {
@@ -38,7 +37,12 @@ var Overlay = React.createClass({
             <div style={middleStyle} >
               <img src={this.state.userInfo.picture} alt='prof' style={picStyle} />
               <div style={formStyle}>
-                <input id='username' type='text' onKeyUp={this.findAvailability} autofocus={true} placeholder='username' style={inputStyle} />
+                <input id='username' type='text' 
+                  onKeyUp={this.findAvailability} 
+                  onKeyPress={(e) => function (e) { if (e.key === 'Enter') {this.signUp} }}
+                  autofocus={true} 
+                  placeholder='username' 
+                  style={inputStyle} />
                 <input id='firstName' type='text' defaultValue={this.state.userInfo.firstName} style={inputStyle} />
                 <input id='lastName' type='text' defaultValue={this.state.userInfo.lastName} style={inputStyle} />
                 <input id='email' type='text' defaultValue={this.state.userInfo.email} style={inputStyle} />              
@@ -73,7 +77,6 @@ var Overlay = React.createClass({
     }
   },
   reportAvailability: function() {
-    console.log(this.state.validUsername)
     if (this.state.validUsername) {
       return <span>{this.state.username} is available</span>
     } else if (this.isValidUsername( this.state.username )) {
@@ -85,8 +88,6 @@ var Overlay = React.createClass({
   responseFacebook: function(response) { //TODO: sign in with google fucking cookies
     if(response.status !== 'unknown') {
       var profile = {}
-      console.log(response)
-
       var names = response.name.split(' ')
       profile.firstName = names[0]
       profile.lastName = names[names.length-1]
@@ -104,6 +105,10 @@ var Overlay = React.createClass({
       profile.lastName = response.wc.Na
       profile.picture = response.wc.Ph
 
+      if (profile.picture === undefined){
+        profile.picture = './assets/dolphin.png'
+      }
+
       this.findUser(profile)
     }
   },
@@ -114,7 +119,6 @@ var Overlay = React.createClass({
       data: {'email': profile.email},
       success: function(response) {
         if(response.profile === null){
-          console.log('new user')
           this.setState({newUser: true, userInfo: profile})
         } else {
           this.props.signIn(response)
@@ -166,7 +170,6 @@ var Overlay = React.createClass({
     userInfo.email = document.getElementById('email').value.toLowerCase()
     userInfo.photo = this.state.userInfo.picture
 
-    console.log(userInfo)
     var err = ''
 
     //check all fields to for emptyness/validity
@@ -236,7 +239,7 @@ var inputStyle = {
 }
 
 var middleStyle = {
-  height: '150'
+  height: '150px'
 }
 
 var overlayStyle = {
