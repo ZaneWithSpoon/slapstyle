@@ -4,17 +4,50 @@ import Header from './header'
 import Toolbar from './toolbar'
 import Editor from './editor'
 import InstrumentPanel from './instrumentPanel'
+import audio from './audio'
 
 //socket
 var socket = io.connect('http://localhost:8080')
 
 //creating empty measure for rendering editor view
-var division = 4
+var division = 8
+var range = ['kick', 'snare', 'tom', 'hat']
+var bpm = 120
+var speed = 60000/bpm/(division/2)
+var playingBeat = -1
+var beatWait = []
 var testMeasure = []
-for (var i = 0; i < division; i++)
+for (var i = 0; i < division*4; i++)
   testMeasure.push([])
-for (var i = 0; i < division; i+=8)
-  testMeasure[i].push('kick')
+
+  testMeasure[0].push('kick')
+  testMeasure[6].push('kick')
+  testMeasure[14].push('kick')
+  testMeasure[22].push('kick')
+  testMeasure[28].push('kick')
+  testMeasure[8].push('snare')
+  testMeasure[24].push('snare')
+  testMeasure[2].push('tom')
+  testMeasure[18].push('tom')
+
+  testMeasure[0].push('hat')
+  testMeasure[2].push('hat')
+  testMeasure[4].push('hat')
+  testMeasure[6].push('hat')
+  testMeasure[7].push('hat')
+  testMeasure[8].push('hat')
+  testMeasure[10].push('hat')
+  testMeasure[14].push('hat')
+  testMeasure[16].push('hat')
+  testMeasure[18].push('hat')
+  testMeasure[20].push('hat')  
+  testMeasure[21].push('hat')
+  testMeasure[23].push('hat')
+  testMeasure[24].push('hat')
+  testMeasure[26].push('hat')
+  testMeasure[28].push('hat')
+  testMeasure[30].push('hat')
+
 
 var Main = React.createClass({
   render: function() {
@@ -32,13 +65,20 @@ var Main = React.createClass({
           socket={socket}
           changeSongs={this.changeSongs}
           roommates={this.state.roommates} />
-        <Toolbar />
+        <Toolbar 
+          playing={this.state.playing} 
+          play={this.play}
+          stop={this.stop} />
         <Editor 
-          range={this.state.range}
-          measure={this.state.testMeasure} 
-          division={this.state.division} />
-        <div onClick={this.emitTest}>emit test</div>
-        <InstrumentPanel />
+          range={range}
+          audio={audio}
+          measure={this.state.measures[this.state.focusId]} 
+          division={this.state.division} 
+          toggleNote={this.toggleNote}
+          playingBeat={this.state.playingBeat} />
+        <InstrumentPanel
+          channels={this.state.channels}
+          measures={this.state.measures} />
       </site>
     )
   },
@@ -49,37 +89,49 @@ var Main = React.createClass({
         id: "user-7bc40883-73be-41e9-8339-5ac54e2b688e",
         photo: './assets/dolphin.png'
       },
-      roommates: [],
-      song: {},
-      songId: '',
       isLoggedIn: false,
       isModal: false,
-      testMeasure: testMeasure,
+      roommates: [],
+      playingBeat: -1,
+      playing: false,
+      songId: '',
+      focusId: 'test',
       division: division,
-      range: ['kick', 'snare', 'tom', 'hat']
+      channels: {},
+      measures: {'test': { notes: testMeasure }}
     }
   },
-  emitTest: function() {
-    // socket.emit('switch room', { new: "song-99abcb4e-b37f-4de4-b890-29039db4711a", user: {
-    //     username: 'fakeName',
-    //     id: "fake id",
-    //     photo: './assets/dolphin.png'
-    //   } })
-
-    socket.emit('test room', {id: this.state.songId, message: 'this song'})
+  play: function() {
+    this.setState({playing: true})
+    if (this.state.playingBeat === 31) {
+      this.setState({playingBeat: 0}, function() {
+        for (var note in this.state.measures[this.state.focusId].notes[this.state.playingBeat]) {
+          audio.playSample(this.state.measures[this.state.focusId].notes[this.state.playingBeat][note])
+        }
+      })
+    } else {
+      this.setState({playingBeat: this.state.playingBeat+1}, function() {
+        for (var note in this.state.measures[this.state.focusId].notes[this.state.playingBeat]) {
+          audio.playSample(this.state.measures[this.state.focusId].notes[this.state.playingBeat][note])
+        }
+      })
+    }
+    beatWait.push(setTimeout(() => this.play(), speed))
+  },
+  stop: function() {
+    console.log('stop')
+    this.setState({playing: false, playingBeat: -1})
+    for(i = 0; i < beatWait.length; i++){
+      clearTimeout(beatWait[i])
+    }
+    beatWait = []
   },
   userHasJoined: function(newUser) {
-    console.log('another user joined the room ')
-    console.log(newUser)
-
     var newRoommates = this.state.roommates
     newRoommates.push(newUser)
     this.setState({roommates: newRoommates})
   },
   userHasLeft: function(userid) {
-    console.log('user left')
-    console.log(userid)
-
     var newRoommates = []
     this.state.roommates.map(function (user) {
       console.log(user)
@@ -87,8 +139,6 @@ var Main = React.createClass({
         newRoommates.push(user)
       }
     })
-
-    console.log(newRoommates)
     this.setState({roommates: newRoommates})
   },
   socketListeners: function() {
@@ -105,22 +155,86 @@ var Main = React.createClass({
       that.userHasLeft(data.user.id)
     })
     socket.on('new room', function (data) {
-      console.log(data)
+      that.organizeHypermeasures(data)
+    })
+    socket.on('updated measure', function (data) {
+      that.updateMeasure(data.hmid, data.measure)
     })
     socket.on('invited', function (data) {
-      console.log(data + ' has invited you to work on a song')
       alert(data + ' has invited you to work on a song')
     })
     socket.on('working event', function (data) {
       console.log(data)
     })
   },
+  updateMeasure: function (id, replacement) {
+    var tempMeasures = this.state.measures
+    tempMeasures[id] = replacement
+    this.setState({measures: tempMeasures})
+  },
+  organizeHypermeasures: function (hms) {
+    var channels = {}
+    var measures = {}
+    var focusId = ''
+
+    for (var i = 0; i < hms.length; i++) {
+      if (channels[hms[i].channelid] === null) {
+        channels[hms[i].channelid] = {
+          name: hms[i].channelname,
+          position: hms[i].channelposition,
+          sampletype: hms[i].sampletype
+        }
+      } 
+      measures[hms[i].hmid] = {
+        name: hms[i].hmname,
+        position: hms[i].hmposition,
+        notes: hms[i].notes,
+        sampletype: hms[i].sampletype
+      }
+      if (hms[i].channelposition === 0 && hms[i].hmposition === 0 ) {
+        focusId = hms[i].hmid
+      }
+    }
+    this.setState({channels: channels, measures: measures, focusId: focusId})
+  },
   toggleOverlay: function() {
     this.setState({ isModal: (this.state.isModal) ? false : true})
   },
-  changeSongs: function(songid) {
-    //TODO: get song from db
+  toggleNote: function(note, beat) {
+    var newMeasure = []
 
+    var found = false
+    for (var i = 0; i < this.state.measures[this.state.focusId].notes.length; i++) {
+      if (i !== beat ){
+        newMeasure.push(this.state.measures[this.state.focusId].notes[i])
+      } else {
+        var replacement = []
+        for (var j = 0; j < this.state.measures[this.state.focusId].notes[i].length; j++) {
+          if (this.state.measures[this.state.focusId].notes[i][j] !== note) {
+            replacement.push(this.state.measures[this.state.focusId].notes[i][j])
+          } else {
+            found = true
+          }
+        }
+        if (!found) {
+          replacement.push(note)
+        }
+        newMeasure.push(replacement)
+      }
+    }
+
+    socket.emit('update notes', {
+      songid: this.state.songId,
+      hmid: this.state.focusId,
+      replacement: {
+        notes: newMeasure,
+        position: this.state.measures[this.state.focusId].position,
+        name: this.state.measures[this.state.focusId].name,
+        sampletype: this.state.measures[this.state.focusId].sampletype
+      }
+    })
+  },
+  changeSongs: function(songid) {
     if (songid !== this.state.songId){
       this.setState({roommates: []})
       if (this.state.songId === '') {
@@ -132,7 +246,6 @@ var Main = React.createClass({
     }
   },
   signIn: function(data) {
-    console.log(data)
     this.setState({
       user: data.user,
       isLoggedIn: true,

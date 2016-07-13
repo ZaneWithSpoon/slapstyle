@@ -3,7 +3,7 @@ var Toolbar = React.createClass({
     return (
       //changing div name moves off screen
       <div style={toolbarStyle}> 
-        <play style={playStyle} onClick={this.play}>
+        <play style={playStyle} onClick={this.props.playing ? this.props.stop : this.props.play}>
           <img src='../assets/play.png' alt='play' style={playStyle.triangle}/> 
         </play>
       </div>

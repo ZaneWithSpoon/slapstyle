@@ -3,23 +3,35 @@ import { range } from 'lodash'
 var Editor = React.createClass({
   render: function() {
     var looping = range(this.props.division * 4)
-    var division = this.props.division //cheating the jsx
     return (
       <div style={editorStyle}>
         {this.props.range.map(function(note, i) {
           return (
-            <row id={'row'+i} style={rowStyle}>
-              <note style={noteStyle}>{note}</note>
+            <row key={'row'+i} style={rowStyle}>
+              <note key={note} style={noteStyle} onClick={() => this.props.audio.playSample(note)}>{note}</note>
               {looping.map(function(beat) {
                 return (
-                  <div style={Math.floor(beat/division) % 2 === 0 ? evenStyle: oddStyle}>{beat}</div>
+                  <div key={note + beat} style={this.isSelected(note, beat)} onClick={() => this.props.toggleNote(note, beat)}></div>
                 )
-              })}
+              }.bind(this))}
             </row>
           )
-        })}
+        }.bind(this))}
       </div>
     )
+  }, isSelected: function(note, beat) {
+    var division = this.props.division //cheating the jsx
+    for (var i=0; i < this.props.measure.notes[beat].length; i++){
+      if (this.props.measure.notes[beat][i] === note){
+        return selectedStyle
+      }
+    }
+    if (beat === this.props.playingBeat){
+      return playingStyle
+    } else {
+      var result = Math.floor(beat/(division/2)) % 2 === 0 ? evenStyle: oddStyle
+      return result
+    }
   }
 })
 
@@ -43,8 +55,16 @@ var noteStyle = {
   textAlign: 'left',
   float: 'left'
 }
+var selectedStyle = {
+  width: '1.5em',
+  height: '2em',
+  margin: '.1em',
+  borderRadius: '.3em',
+  backgroundColor: '#1CCAD8',
+  float: 'left'
+}
 var evenStyle = {
-  width: '2em',
+  width: '1.5em',
   height: '2em',
   margin: '.1em',
   borderRadius: '.3em',
@@ -52,19 +72,19 @@ var evenStyle = {
   float: 'left'
 }
 var oddStyle = {
-  width: '2em',
+  width: '1.5em',
   height: '2em',
   margin: '.1em',
   borderRadius: '.3em',
   backgroundColor: '#3c4348',
   float: 'left'
 }
-var testStyle = {
-  width: '2em',
+var playingStyle = {
+  width: '1.5em',
   height: '2em',
   margin: '.1em',
   borderRadius: '.3em',
-  backgroundColor: '#3c4348',
+  backgroundColor: 'white',
   float: 'left'
 }
 
