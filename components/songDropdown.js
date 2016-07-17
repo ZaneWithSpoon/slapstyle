@@ -8,6 +8,7 @@ var SongDropdown = React.createClass({
       return (
         <div id='songDropdown' tabIndex='-1' onBlur={this.props.hideSongs} style={dropdownStyle}> 
           {rows}
+          <div style={songStyle.addSong}>add song</div>
         </div>
       )
     } else {
@@ -43,11 +44,10 @@ var dropdownStyle = {
   outlineWidth: '0px',
   backgroundColor: '#30353a',
   border: 'solid',
-  borderColor: 'black',
+  borderColor: '#23272A',
   borderWidth: '1px',
   borderTop: '0px',
-  borderBottomLeftRadius: '15px',
-  borderBottomRightRadius: '15px'
+  boxShadow: '1px 1px 2px black',
 }
 var songStyle = {
   borderTop: 'grey',
@@ -58,6 +58,12 @@ var songStyle = {
   },
   owner: {
     fontSize: '12px'
+  },
+  addSong: {
+    height: '2em',
+    borderTop: 'grey',
+    paddingLeft: '5px', 
+    backgroundColor: '#23272A'
   }
 }
 

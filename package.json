@@ -11,6 +11,8 @@
     "react-addons-css-transition-group": "^15.2.0",
     "react-facebook-login": "^3.1.0",
     "react-google-login": "^2.1.2",
+    "react-native-material-switch": "0.0.4",
+    "react-tap-event-plugin": "^1.0.0",
     "socket.io": "^1.4.8",
     "soundfont-player": "^0.10.1",
     "validator": "^5.4.0"

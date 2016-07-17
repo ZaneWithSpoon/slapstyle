@@ -17,9 +17,9 @@ var Header = React.createClass({
             <img src='./assets/search.png' alt='search' style={searchbarStyle.glass}/>
             <input id='invited' type='text' onKeyPress={this.addUser} placeholder='Invite friends by username' style={searchbarStyle.input} />
           </div>
-          <button id='songList' style={songListStyle} onClick={this.showSongs}>
+          <div id='songList' style={songListStyle} onClick={this.showSongs}>
             <span style={songListStyle.name}>{this.props.songId} &#9662; </span>
-          </button>
+          </div>
           {roommates}
           <div id='user' style={userStyle}>
             <p style={userStyle.name}>{this.props.user.username}</p>
@@ -123,7 +123,7 @@ var searchbarStyle = {
     marginTop: '5px',
     fontSize: '16px',
     opacity: '1.0',
-    color: 'black',
+    color: 'white',
     width: '85%',
     height: '80%'
   }
@@ -134,9 +134,9 @@ var songListStyle = {
   minWidth: '10em',
   maxWidth: '12em',
   color: 'white',
+  textAlign: 'center',
   marginLeft: '5px',
-  borderLeft: '2px solid #30353a',
-
+  paddingLeft: '2px',
   name: {
     marginTop: '1.5em'
   }
@@ -148,9 +148,10 @@ var userStyle = {
     float: 'left'
   },
   pic: {
-    height: '90%',
+    height: '87%',
     marginLeft: '8px',
-    marginTop: '2px',
+    marginTop: '2px',  
+    boxShadow: '0px 0px 10px #1CCAD8',
     borderRadius: '25px'
   }
 }
@@ -175,7 +176,8 @@ var loginStyle = {
   color: 'black',
   backgroundColor: 'white',
   borderRadius: '.5em',
-  textAlign: 'center'
+  textAlign: 'center',
+  boxShadow: '1px 1px 2px black'
 }
 
 export default Header

@@ -14,7 +14,8 @@ var Toolbar = React.createClass({
 var toolbarStyle = {
   width: '100%',
   height: '3em',
-  backgroundColor: '#30353a'
+  backgroundColor: '#30353a',
+  boxShadow: '1px 1px 2px black'
 }
 var playStyle = {
   float: 'left',

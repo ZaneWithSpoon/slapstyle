@@ -10,6 +10,8 @@ import audio from './audio'
 var socket = io.connect('http://localhost:8080')
 
 //creating empty measure for rendering editor view
+var userColors = ['#1CCAD8', 'green', 'purple', 'red']
+var users = 1
 var division = 8
 var range = ['kick', 'snare', 'tom', 'hat']
 var bpm = 120
@@ -48,11 +50,14 @@ for (var i = 0; i < division*4; i++)
   testMeasure[28].push('hat')
   testMeasure[30].push('hat')
 
+var anothertestMeasure = []
+for (var i = 0; i < 8*4; i++)
+  anothertestMeasure.push([])
 
 var Main = React.createClass({
   render: function() {
     return (
-      <site>
+      <site style={containerStyle}>
         <Overlay 
           visible={this.state.isModal} 
           toggleOverlay={this.toggleOverlay} 
@@ -64,7 +69,8 @@ var Main = React.createClass({
           songId={this.state.songId}
           socket={socket}
           changeSongs={this.changeSongs}
-          roommates={this.state.roommates} />
+          roommates={this.state.roommates}
+          userColors={userColors} />
         <Toolbar 
           playing={this.state.playing} 
           play={this.play}
@@ -72,13 +78,17 @@ var Main = React.createClass({
         <Editor 
           range={range}
           audio={audio}
-          measure={this.state.measures[this.state.focusId]} 
+          measures={this.state.measures} 
+          focusId={this.state.focusId}
           division={this.state.division} 
           toggleNote={this.toggleNote}
           playingBeat={this.state.playingBeat} />
         <InstrumentPanel
           channels={this.state.channels}
-          measures={this.state.measures} />
+          measures={this.state.measures}
+          focusId={this.state.focusId}
+          updateFocus={this.updateFocus}
+          addMeasure={this.addMeasure} />
       </site>
     )
   },
@@ -86,7 +96,7 @@ var Main = React.createClass({
     return {
       user: {
         username: 'fakeName',
-        id: "user-7bc40883-73be-41e9-8339-5ac54e2b688e",
+        id: "user-05ebe7d8-edb3-4bb9-b2b5-2400bb98aee5",
         photo: './assets/dolphin.png'
       },
       isLoggedIn: false,
@@ -95,11 +105,32 @@ var Main = React.createClass({
       playingBeat: -1,
       playing: false,
       songId: '',
-      focusId: 'test',
+      focusId: 'test2',
       division: division,
-      channels: {},
-      measures: {'test': { notes: testMeasure }}
+      channels: { 'fakeId': {name: 'channel', position: 0},  'alsoFake': {name: 'channel 2', position: 1} },
+      measures: {
+        'test': { name: 'measure name', notes: testMeasure, position: 0, channelid: 'fakeId', sampletype: 'drums'},
+        'test3': { name: 'measure name5', notes: anothertestMeasure, position: 1, channelid: 'fakeId', sampletype: 'drums'},
+        'test2': { name: 'measure2 name', notes: testMeasure, position: 0, channelid: 'alsoFake', sampletype: 'piano'}
+      }
     }
+  },
+  updateFocus: function(newFocus) {
+    if (this.state.focusId !== newFocus) {
+      this.setState({focusId: newFocus})
+    }
+  },
+  addMeasure: function(newMeasure) {
+    console.log(newMeasure)
+    var newMeasures = this.state.measures
+    newMeasures[newMeasure.id] = {
+      name: newMeasure.name, 
+      notes: newMeasure.notes, 
+      position: newMeasure.position, 
+      channelid: newMeasure.channelid,
+      sampletype: newMeasure.sampletype
+    }
+    this.setState({measures: newMeasures})
   },
   play: function() {
     this.setState({playing: true})
@@ -178,7 +209,7 @@ var Main = React.createClass({
     var focusId = ''
 
     for (var i = 0; i < hms.length; i++) {
-      if (channels[hms[i].channelid] === null) {
+      if (channels[hms[i].channelid] === undefined) {
         channels[hms[i].channelid] = {
           name: hms[i].channelname,
           position: hms[i].channelposition,
@@ -189,7 +220,8 @@ var Main = React.createClass({
         name: hms[i].hmname,
         position: hms[i].hmposition,
         notes: hms[i].notes,
-        sampletype: hms[i].sampletype
+        sampletype: hms[i].sampletype,
+        channelid: hms[i].channelid
       }
       if (hms[i].channelposition === 0 && hms[i].hmposition === 0 ) {
         focusId = hms[i].hmid
@@ -230,7 +262,8 @@ var Main = React.createClass({
         notes: newMeasure,
         position: this.state.measures[this.state.focusId].position,
         name: this.state.measures[this.state.focusId].name,
-        sampletype: this.state.measures[this.state.focusId].sampletype
+        sampletype: this.state.measures[this.state.focusId].sampletype,
+        channelid: this.state.measures[this.state.focusId].channelid
       }
     })
   },
@@ -260,5 +293,11 @@ var Main = React.createClass({
     }
   }
 })
+
+var containerStyle = {
+  display: 'flex', 
+  height: '100%', 
+  flexDirection: 'column'
+}
 
 export default Main
