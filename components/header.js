@@ -91,6 +91,7 @@ var Header = React.createClass({
               origin: this.props.user.username,
               songid: this.props.songId
             })
+            alert(username + ' has been invited to this song')
           }
         }.bind(this),
         error: function(xhr) {
@@ -101,7 +102,7 @@ var Header = React.createClass({
     }
   }
 })
-
+ 
 var searchbarStyle = {
   float: 'left',
   height: '70%',
