@@ -7,7 +7,7 @@ import InstrumentPanel from './instrumentPanel'
 import audio from './audio'
 
 //socket
-var socket = io.connect('http://localhost:8080')
+//var socket = io.connect('http://localhost:8080')
 
 //creating empty measure for rendering editor view
 var userColors = ['#1CCAD8', 'green', 'purple', 'red']
@@ -67,14 +67,17 @@ var Main = React.createClass({
           isLoggedIn={this.state.isLoggedIn} 
           user={this.state.user} 
           songId={this.state.songId}
-          socket={socket}
+          //socket={socket}
           changeSongs={this.changeSongs}
           roommates={this.state.roommates}
           userColors={userColors} />
         <Toolbar 
           playing={this.state.playing} 
           play={this.play}
-          stop={this.stop} />
+          stop={this.stop}
+          bpm ={this.state.bpm}
+          updateBpm={this.updateBpm}
+          changeBpm={this.changeBpm} />
         <Editor 
           range={range}
           audio={audio}
@@ -99,13 +102,14 @@ var Main = React.createClass({
         id: "user-05ebe7d8-edb3-4bb9-b2b5-2400bb98aee5",
         photo: './assets/dolphin.png'
       },
-      isLoggedIn: false,
+      isLoggedIn: true,
       isModal: false,
       roommates: [],
       playingBeat: -1,
       playing: false,
       songId: '',
-      focusId: 'test2',
+      focusId: 'test',
+      bpm: 120,
       division: division,
       channels: { 'fakeId': {name: 'channel', position: 0},  'alsoFake': {name: 'channel 2', position: 1} },
       measures: {
@@ -202,6 +206,11 @@ var Main = React.createClass({
     var tempMeasures = this.state.measures
     tempMeasures[id] = replacement
     this.setState({measures: tempMeasures})
+  },
+  updateBpm: function (newBpm) {
+  	this.setState({bpm: newBpm})
+  	document.getElementById('sliderBpm').value = newBpm
+    document.getElementById('textBpm').value = newBpm
   },
   organizeHypermeasures: function (hms) {
     var channels = {}
