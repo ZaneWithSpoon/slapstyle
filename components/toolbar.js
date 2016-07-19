@@ -1,6 +1,5 @@
 var Toolbar = React.createClass({
   render: function() {
-    console.log(this.props)
     return (
       //changing div name moves off screen
       <div style={toolbarStyle}> 

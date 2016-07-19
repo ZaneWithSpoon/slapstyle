@@ -7,17 +7,13 @@ import InstrumentPanel from './instrumentPanel'
 import audio from './audio'
 
 //socket
-//var socket = io.connect('http://localhost:8080')
+var socket = io.connect('http://localhost:8080')
 
 //creating empty measure for rendering editor view
 var userColors = ['#1CCAD8', 'green', 'purple', 'red']
 var users = 1
 var division = 8
 var range = ['kick', 'snare', 'tom', 'hat']
-var bpm = 120
-var speed = 60000/bpm/(division/2)
-var playingBeat = -1
-var beatWait = []
 var testMeasure = []
 for (var i = 0; i < division*4; i++)
   testMeasure.push([])
@@ -67,7 +63,7 @@ var Main = React.createClass({
           isLoggedIn={this.state.isLoggedIn} 
           user={this.state.user} 
           songId={this.state.songId}
-          //socket={socket}
+          socket={socket}
           changeSongs={this.changeSongs}
           roommates={this.state.roommates}
           userColors={userColors} />
@@ -76,8 +72,7 @@ var Main = React.createClass({
           play={this.play}
           stop={this.stop}
           bpm ={this.state.bpm}
-          updateBpm={this.updateBpm}
-          changeBpm={this.changeBpm} />
+          updateBpm={this.updateBpm} />
         <Editor 
           range={range}
           audio={audio}
@@ -99,7 +94,7 @@ var Main = React.createClass({
     return {
       user: {
         username: 'fakeName',
-        id: "user-05ebe7d8-edb3-4bb9-b2b5-2400bb98aee5",
+        id: 'user-163c2b38-1007-4aaf-a234-268647bc3124',
         photo: './assets/dolphin.png'
       },
       isLoggedIn: true,
@@ -142,28 +137,29 @@ var Main = React.createClass({
   },
   play: function() {
     this.setState({playing: true})
-    if (this.state.playingBeat === 31) {
-      this.setState({playingBeat: 0}, function() {
-        for (var note in this.state.measures[this.state.focusId].notes[this.state.playingBeat]) {
-          audio.playSample(this.state.measures[this.state.focusId].notes[this.state.playingBeat][note])
+    this.playMeasure('blah')
+  },
+  playMeasure: function(hmid) {
+    audio.doTimer(division*4, this.state.bpm, 
+      function (step) {
+        this.setState({playingBeat: step})
+        for (var note in this.state.measures[this.state.focusId].notes[step]) {
+          audio.playSample(this.state.measures[this.state.focusId].notes[step][note])
         }
-      })
-    } else {
-      this.setState({playingBeat: this.state.playingBeat+1}, function() {
-        for (var note in this.state.measures[this.state.focusId].notes[this.state.playingBeat]) {
-          audio.playSample(this.state.measures[this.state.focusId].notes[this.state.playingBeat][note])
+      }.bind(this),
+      function (step, repeat) {
+        if (this.state.playing) {
+          this.setState({playingBeat: -1})
+          repeat(true)
+        } else {
+          this.setState({playingBeat: -1})
+          repeat(false)
         }
-      })
-    }
-    beatWait.push(setTimeout(() => this.play(), speed))
+      }.bind(this))
   },
   stop: function() {
-    console.log('stop')
     this.setState({playing: false, playingBeat: -1})
-    for(i = 0; i < beatWait.length; i++){
-      clearTimeout(beatWait[i])
-    }
-    beatWait = []
+    audio.killItAll()
   },
   userHasJoined: function(newUser) {
     var newRoommates = this.state.roommates

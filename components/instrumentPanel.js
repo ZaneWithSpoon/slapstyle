@@ -1,3 +1,4 @@
+//TODO: make instrument panel always hit bottom of page
 var InstrumentPanel = React.createClass({
   render: function() {
     var channels = []
@@ -27,6 +28,8 @@ var InstrumentPanel = React.createClass({
     }
   },
   drawChannels: function(channel, id) {
+    //TODO: figure out ho to add channel options (hamburger menu?)
+    //TODO: make add measure 'paper' pull down on hover
     var measures = []
     for (var measure in this.props.measures) {
       if (this.props.measures[measure].channelid === id){
@@ -45,6 +48,9 @@ var InstrumentPanel = React.createClass({
     )
   },
   drawMeasures: function(measure, id) {
+    //TODO: make measures clickable everywhere except checkbox & triangle
+    //TODO: make checkboxes volume/mute icons or something intuitive
+    //TODO: rename measures option next to delete
     return (
       <div key={id} style={this.props.focusId === id ? channelStyle.focusContainer : null}>
         <div style={channelStyle.measure}>
@@ -184,7 +190,8 @@ var channelStyle = {
     justifyContent: 'center',
     flexShrink: 0,
     padding: '5px',
-    width: '10em'
+    width: '10em',
+    cursor: 'pointer'
   },
   left: {
     display: 'flex',
