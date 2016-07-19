@@ -21,6 +21,11 @@ var InstrumentPanel = React.createClass({
       </div>
     )
   },
+  getInitialState: function() {
+    return {
+      openOptions: ''
+    }
+  },
   drawChannels: function(channel, id) {
     var measures = []
     for (var measure in this.props.measures) {
@@ -41,16 +46,18 @@ var InstrumentPanel = React.createClass({
   },
   drawMeasures: function(measure, id) {
     return (
-      <div 
-      key={id} 
-      onClick={() => this.props.updateFocus(id)}
-      style={this.props.focusId === id ? channelStyle.focusMeasure : channelStyle.measure}>
-        <div style={channelStyle.topRow}>
-          <span style={channelStyle.name}>{measure.name}</span>
-          <input type="checkbox" defaultChecked={true}></input>
+      <div key={id} style={this.props.focusId === id ? channelStyle.focusContainer : null}>
+        <div style={channelStyle.measure}>
+          <div style={channelStyle.left} onClick={() => this.props.updateFocus(id)}>
+            <span style={channelStyle.name}>{measure.name}</span>
+          </div>
+          <div style={channelStyle.right}>
+            <input style={{cursor: 'pointer'}} type="checkbox" defaultChecked={true} onClick={() => console.log('checkbox')}></input>
+            <span style={{cursor: 'pointer'}} onClick={() => this.updateOptions(id)}>&#9662;</span>
+          </div>
         </div>
-        <div style={channelStyle.bottomRow}>
-          <span>&#9662;</span>
+        <div style={this.state.openOptions === id ? channelStyle.options : channelStyle.hiddenOptions}>
+          <button style={channelStyle.button} onClick={() => this.removeMeasure(id)}>delete</button>
         </div>
       </div>
     )
@@ -59,7 +66,6 @@ var InstrumentPanel = React.createClass({
 
   },
   addMeasure: function(channelid, position) {
-    console.log(position)
     var anothertestMeasure = []
     for (var i = 0; i < 8*4; i++)
       anothertestMeasure.push([])
@@ -67,13 +73,24 @@ var InstrumentPanel = React.createClass({
     var newMeasure = {
       name: this.props.channels[channelid].name + position,
       position: position,
-      sampletype: 'drums',
+      sampletype: this.props.channels[channelid].sampletype,
       channelid: channelid,
       id: this.props.channels[channelid].name + position,
       notes: anothertestMeasure
     }
 
     this.props.addMeasure(newMeasure)
+  },
+  removeMeasure: function(hmid) {
+    //TODO: make socket call to delete measure
+    console.log('remove ' + hmid)
+  },
+  updateOptions: function(hmid) {
+    if (this.state.openOptions === hmid) {
+      this.setState({openOptions:''})
+    } else {
+      this.setState({openOptions: hmid})
+    }
   }
 })
 
@@ -83,30 +100,9 @@ var newChannelStyle = {
   marginBottom: '1em',
   paddingLeft: '10px',
   header: {
-    height: '2em'
+    minHeight: '2em'
   },
   option: {
-    zIndex: '2',
-    display: 'flex',
-    alignItems: '',
-    height: '4em',
-    justifyContent: 'space-between',
-    flexDirection: 'column',
-    width: '10em',
-    padding: '5px',
-    backgroundColor: '#23272A',
-    boxShadow: '1px 1px 2px black'
-  }
-}
-
-var channelStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  paddingLeft: '10px',
-  header: {
-    height: '2em'
-  },
-  measure: {
     zIndex: '2',
     display: 'flex',
     alignItems: '',
@@ -116,50 +112,102 @@ var channelStyle = {
     width: '10em',
     padding: '5px',
     backgroundColor: '#23272A',
-    boxShadow: '1px 1px 2px black'
+    boxShadow: '1px 1px 3px black'
+  }
+}
+
+var channelStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+  paddingLeft: '10px',
+  header: {
+    minHeight: '2em'
   },
-  focusMeasure: {
-    zIndex: '3',
+  measure: {
+    zIndex: '2',
     display: 'flex',
-    alignItems: '',
-    height: '4em',
+    minHeight: '4em',
     justifyContent: 'space-between',
-    flexDirection: 'column',
+    flexDirection: 'row',
     width: '10em',
     padding: '5px',
     backgroundColor: '#23272A',
+    boxShadow: '1px 1px 2px black'
+  },
+  focusContainer: {
+    zIndex: 5,
     boxShadow: '0px 0px 7px #1CCAD8'
   },
+  options: {
+    zIndex: 1,
+    display: 'flex',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    boxShadow: '1px 1px 3px black',
+    justifyContent: 'center',
+    flexShrink: 0,
+    padding: '5px',
+    width: '10em',
+    overflow: 'hidden',
+    height: '2em',
+    transition: 'height .5s',
+    transitionTimingFunction: 'ease-out'
+  },
+  hiddenOptions: {
+    zIndex: 1,
+    display: 'flex',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    boxShadow: '1px 1px 3px black',
+    justifyContent: 'center',
+    flexShrink: 0,
+    width: '100%',
+    overflow: 'hidden',
+    height: '0em',
+    transition: 'height .5s',
+    transitionTimingFunction: 'ease-out'
+  },
+  button: {
+    margin: '1em',
+    backgroundColor: 'transparent',
+    cursor: 'pointer',
+    color: 'white',
+    borderWidth: '0px'
+  },
   add: {
-    zIndex: '1',
+    zIndex: 2,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#30353a',
-    boxShadow: '1px 1px 2px black',
+    boxShadow: '1px 1px 3px black',
     justifyContent: 'center',
+    flexShrink: 0,
     padding: '5px',
     width: '10em'
   },
-  topRow: {
+  left: {
     display: 'flex',
-    justifyContent:'space-between'
+    justifyContent:'space-between',
+    cursor: 'pointer'
   },
-  bottomRow: {
+  right: {
     display: 'flex',
-    justifyContent: 'flex-end'
+    flexDirection: 'column',
+    justifyContent: 'space-between'
   },
   name: {
     fontSize: '18px'
   }
 }
 var panelStyle = {
+  zIndex: 1,
   width: '100%',
+  flexGrow: 1,
   display: 'flex',
   flexDirection: 'row',
-  flexGrow: '1',
-  overflow: 'auto',
   paddingTop: '1em',
+  paddingBottom: '1em',
   boxShadow: '0px 0px 2px black',
   backgroundColor:'#30353a'
 }

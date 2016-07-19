@@ -26,6 +26,7 @@ var Toolbar = React.createClass({
 
 
 var toolbarStyle = {
+  zIndex: 1,
   width: '100%',
   height: '3em',
   backgroundColor: '#30353a',
@@ -37,6 +38,7 @@ var playStyle = {
   width: '1.75em',
   fontSize: '1.75em',
   borderRight: '2px solid #23272A',
+  cursor: 'pointer',
 
   triangle : {
     height: '1.5em',

@@ -111,7 +111,7 @@ var Main = React.createClass({
       focusId: 'test',
       bpm: 120,
       division: division,
-      channels: { 'fakeId': {name: 'channel', position: 0},  'alsoFake': {name: 'channel 2', position: 1} },
+      channels: { 'fakeId': {name: 'channel', position: 0, sampletype: 'drums'},  'alsoFake': {name: 'channel 2', position: 1, sampletype: 'piano'} },
       measures: {
         'test': { name: 'measure name', notes: testMeasure, position: 0, channelid: 'fakeId', sampletype: 'drums'},
         'test3': { name: 'measure name5', notes: anothertestMeasure, position: 1, channelid: 'fakeId', sampletype: 'drums'},
@@ -125,7 +125,6 @@ var Main = React.createClass({
     }
   },
   addMeasure: function(newMeasure) {
-    console.log(newMeasure)
     var newMeasures = this.state.measures
     newMeasures[newMeasure.id] = {
       name: newMeasure.name, 
@@ -135,6 +134,11 @@ var Main = React.createClass({
       sampletype: newMeasure.sampletype
     }
     this.setState({measures: newMeasures})
+  },
+  removeMeasure: function(hmid) {
+    var newMeasures = this.state.measures
+    delete newMeasures[hmid]
+    this.setState({measures, newMeasures})
   },
   play: function() {
     this.setState({playing: true})
@@ -213,6 +217,7 @@ var Main = React.createClass({
     document.getElementById('textBpm').value = newBpm
   },
   organizeHypermeasures: function (hms) {
+    console.log(hms)
     var channels = {}
     var measures = {}
     var focusId = ''

@@ -138,6 +138,7 @@ var songListStyle = {
   textAlign: 'center',
   marginLeft: '5px',
   paddingLeft: '2px',
+  cursor: 'pointer',
   name: {
     marginTop: '1.5em'
   }

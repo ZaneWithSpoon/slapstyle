@@ -7,7 +7,7 @@ var Editor = React.createClass({
     var looping = range(this.props.division * 4)
     if(this.props.measures[this.props.focusId].sampletype === 'drums') {
       return (
-        <div style={editorStyle}>
+        <div style={drumStyle}>
           {this.props.range.map(function(note, i) {
             return (
               <row key={'row'+i} style={rowStyle}>
@@ -25,7 +25,7 @@ var Editor = React.createClass({
     } else {
       var octaves = range(7)
       return (
-        <div style={editorStyle}>
+        <div style={pianoStyle}>
           {pianoNotes.map(function(note, i) {
             return (
               <row key={'row'+i} style={rowStyle}>
@@ -57,24 +57,28 @@ var Editor = React.createClass({
   }
 })
 
-var editorStyle = {
+var drumStyle = {
   display: 'flex',
   flexDirection: 'column',
-  flexGrow: '1',
-  minHeight: '210px',
+  minHeight: '200px',
+  maxHeight: '200px',
   justifyContent: 'center',
+  alignItems: 'center',
   overflow: 'auto',
-  marginTop: '1.5em',
-  marginBottom: '1.5em',
-  marginLeft: 'auto',
-  marginRight: 'auto',
-  textAlign: 'center',
-  transition: 'height 2s'
+  transition: 'minHeight maxHeight 2s'
+}
+var pianoStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+  minHeight: '350px',
+  maxHeight: '350px',
+  alignItems: 'center',
+  overflow: 'auto',
+  transition: 'maxHeight minHeight 2s'
 }
 var rowStyle = {
   display: 'flex',
-  minHeight: '2em',
-  margin: '.1em'
+  flexShrink: 0
 }
 var noteStyle = {
   width: '4em',
@@ -82,7 +86,7 @@ var noteStyle = {
   margin: '.1em',
   borderRadius: '.3em',
   textAlign: 'left',
-  float: 'left'
+  cursor: 'pointer'
 }
 var selectedStyle = {
   width: '1.5em',
@@ -90,7 +94,7 @@ var selectedStyle = {
   margin: '.1em',
   borderRadius: '.3em',
   backgroundColor: '#1CCAD8',
-  float: 'left'
+  cursor: 'pointer'
 }
 var evenStyle = {
   width: '1.5em',
@@ -98,7 +102,7 @@ var evenStyle = {
   margin: '.1em',
   borderRadius: '.3em',
   backgroundColor: '#30353a',
-  float: 'left'
+  cursor: 'pointer'
 }
 var oddStyle = {
   width: '1.5em',
@@ -106,7 +110,7 @@ var oddStyle = {
   margin: '.1em',
   borderRadius: '.3em',
   backgroundColor: '#3c4348',
-  float: 'left'
+  cursor: 'pointer'
 }
 var playingStyle = {
   width: '1.5em',
@@ -114,7 +118,7 @@ var playingStyle = {
   margin: '.1em',
   borderRadius: '.3em',
   backgroundColor: 'white',
-  float: 'left'
+  cursor: 'pointer'
 }
 
 

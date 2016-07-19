@@ -36,6 +36,7 @@ var SongDropdown = React.createClass({
 })
 
 var dropdownStyle = {
+  zIndex: 99,
   position: 'fixed',
   float:'right',
   top: '3em',
