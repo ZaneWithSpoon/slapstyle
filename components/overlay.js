@@ -106,7 +106,7 @@ var Overlay = React.createClass({
       profile.picture = response.wc.Ph
 
       if (profile.picture === undefined){
-        profile.picture = './assets/dolphin.png'
+        profile.picture = './assets/png/dolphin.png'
       }
 
       this.findUser(profile)

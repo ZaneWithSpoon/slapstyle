@@ -1,18 +1,18 @@
 //TODO: make instrument panel always hit bottom of page
 var InstrumentPanel = React.createClass({
   render: function () {
-    console.log(this.props.channels)
     var channels = []
     for (var channel in this.props.channels) {
-      channels[this.props.channels[channel].position] = this.drawChannels(this.props.channels[channel], channel)
+      //channels[this.props.channels[channel].position] = this.drawChannels(this.props.channels[channel], channel)
+      channels.push(this.drawChannels(this.props.channels[channel], channel))
     }
     return (
       <div style={panelStyle}>
         {channels}
         <div style={newChannelStyle}>
           <div style={newChannelStyle.header}></div>
-          <div>
-            <div style={newChannelStyle.option} tabIndex='-1' onClick={this.toggleList} onBlur={this.closeList}>
+          <div tabIndex='-1' onBlur={this.closeList} style={{outlineWidth: '0px'}}>
+            <div style={newChannelStyle.option}  onClick={this.toggleList}>
               <span>add more instruments</span>
             </div>
             <div id='instrumentList' 
@@ -20,7 +20,8 @@ var InstrumentPanel = React.createClass({
 
               {this.props.instruments.map(function (name) {
                 return (
-                  <div style={newChannelStyle.instrument} onClick={() => this.addChannel(name)}>
+                  <div key={name} style={newChannelStyle.instrument} onClick={() => this.addChannel(name)}>
+                    <img src='../assets/png/speaker.png' alt='sample' onClick={(e) => this.playSample(e, name)} style={newChannelStyle.speaker} />
                     {name}
                   </div>
                 )
@@ -43,7 +44,8 @@ var InstrumentPanel = React.createClass({
     var measures = []
     for (var measure in this.props.measures) {
       if (this.props.measures[measure].channelid === id){
-        measures[this.props.measures[measure].position] = this.drawMeasures(this.props.measures[measure], measure)
+        //measures[this.props.measures[measure].position] = this.drawMeasures(this.props.measures[measure], measure)
+        measures.push(this.drawMeasures(this.props.measures[measure], measure))
       }
     }
     if (measures.length === 0) {
@@ -83,7 +85,7 @@ var InstrumentPanel = React.createClass({
             <span style={channelStyle.name}>{measure.name}</span>
           </div>
           <div style={channelStyle.right}>
-            <input style={{cursor: 'pointer'}} type="checkbox" defaultChecked={true} onClick={() => console.log('checkbox')}></input>
+            <input style={{cursor: 'pointer'}} type="checkbox" defaultChecked={true} onClick={() => this.props.toggleNextLoop(id)}></input>
             <span style={{cursor: 'pointer'}} onClick={() => this.updateOptions(id)}>&#9662;</span>
           </div>
         </div>
@@ -93,7 +95,13 @@ var InstrumentPanel = React.createClass({
       </div>
     )
   },
+  playSample: function (e, name) {
+    e.stopPropagation()
+    this.props.audio.exampleSound('C5', name)
+  },
   addChannel: function (instrument) {
+    this.closeList()
+
     var position = Object.keys(this.props.channels).length
     var newChannel = {
       position: position,
@@ -154,7 +162,7 @@ var newChannelStyle = {
     justifyContent: 'center',
     flexDirection: 'column',
     outlineWidth: '0px',
-    width: '10em',
+    width: '12em',
     padding: '5px',
     backgroundColor: '#23272A',
     boxShadow: '1px 1px 3px black'
@@ -177,7 +185,14 @@ var newChannelStyle = {
     cursor: 'pointer',
     boxShadow: '0px 0px 1px black',
     minHeight: '1.5em',
-    padding: '5px'
+    padding: '5px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  speaker: {
+    height: '1em',
+    width: '1em'
   }
 }
 
@@ -196,7 +211,7 @@ var channelStyle = {
     minHeight: '4em',
     justifyContent: 'space-between',
     flexDirection: 'row',
-    width: '10em',
+    width: '12em',
     padding: '5px',
     backgroundColor: '#23272A',
     boxShadow: '1px 1px 2px black'
@@ -217,7 +232,7 @@ var channelStyle = {
     justifyContent: 'center',
     flexShrink: 0,
     padding: '5px',
-    width: '10em',
+    width: '12em',
     overflow: 'hidden',
     height: '2em',
     transition: 'height .5s',
@@ -254,7 +269,7 @@ var channelStyle = {
     justifyContent: 'center',
     flexShrink: 0,
     padding: '5px',
-    width: '10em',
+    width: '12em',
     cursor: 'pointer'
   },
   left: {
@@ -272,7 +287,7 @@ var channelStyle = {
   }
 }
 var panelStyle = {
-  zIndex: 1,
+  zIndex: 2,
   width: '100%',
   display: 'flex',
   flexDirection: 'row',

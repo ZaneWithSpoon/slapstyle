@@ -1,11 +1,12 @@
 import { range } from 'lodash'
 
-var pianoNotes = [ 'C5', 'B5', 'A#5', 'A5', 'G#5', 'G5', 'F#5', 'F5',  'E5', 'D#5', 'D5', 'C#5']
+var pianoNotes = [ 'C#6', 'C6', 'B5', 'A#5', 'A5', 'G#5', 'G5', 'F#5', 'F5',  'E5', 'D#5', 'D5', 'C#5', 'C5', 'B4', 'A#4', 'A4', 'G#4', 'G4', 'F#4', 'F4',  'E4', 'D#4', 'D4', 'C3']
 
 var Editor = React.createClass({
   render: function() {
     var looping = range(this.props.division * 4)
-    if(this.props.measures[this.props.focusId].sampletype === 'drums') {
+    var sampleType = this.props.measures[this.props.focusId].sampletype
+    if (sampleType === 'drums') {
       return (
         <div style={drumStyle}>
           {this.props.range.map(function(note, i) {
@@ -29,7 +30,7 @@ var Editor = React.createClass({
           {pianoNotes.map(function(note, i) {
             return (
               <row key={'row'+i} style={rowStyle}>
-                <note key={note} style={noteStyle} onClick={() => this.props.audio.playSample(note)}>{note}</note>
+                <note key={note} style={noteStyle} onClick={() => this.props.audio.playSample(note, sampleType)}>{note}</note>
                 {looping.map(function (beat) {
                   return (
                     <div key={note + beat} style={this.isSelected(note, beat)} onClick={() => this.props.toggleNote(note, beat)}></div>

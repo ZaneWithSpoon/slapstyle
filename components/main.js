@@ -9,6 +9,14 @@ import audio from './audio'
 //socket
 var socket = io.connect('http://localhost:8080')
 
+//preloading piano
+audio.loadInstrument('vibraphone')
+audio.startup()
+
+//fuck you nextList thisList
+var thisLoop = ['test', 'test3', 'test2']
+var nextLoop = ['test', 'test3', 'test2']
+
 //creating empty measure for rendering editor view
 var userColors = ['#1CCAD8', 'green', 'purple', 'red']
 var users = 1
@@ -88,7 +96,9 @@ var Main = React.createClass({
           songId={this.state.songId}
           focusId={this.state.focusId}
           updateFocus={this.updateFocus}
-          socket={socket} />
+          toggleNextLoop={this.toggleNextLoop}
+          socket={socket}
+          audio={audio} />
       </site>
     )
   },
@@ -106,12 +116,13 @@ var Main = React.createClass({
       playing: false,
       songId: '',
       focusId: 'test',
-      bpm: 120,
+      bpm: 110,
       division: division,
-      channels: { 'fakeId': {name: 'channel', position: 0, sampletype: 'drums'},  'alsoFake': {name: 'channel 2', position: 1, sampletype: 'piano'} },
+      channels: { 'fakeId': {name: 'drums', position: 0, sampletype: 'drums'},  'alsoFake': {name: 'vibraphone', position: 1, sampletype: 'vibraphone'} },
       measures: {
-        'test': { name: 'measure name', notes: testMeasure, position: 0, channelid: 'fakeId', sampletype: 'drums'},
-        'test3': { name: 'measure name5', notes: anothertestMeasure, position: 1, channelid: 'fakeId', sampletype: 'drums'}
+        'test': { name: 'trap beat', notes: testMeasure, position: 0, channelid: 'fakeId', sampletype: 'drums'},
+        'test3': { name: '4 to the floor', notes: anothertestMeasure, position: 1, channelid: 'fakeId', sampletype: 'drums'},
+        'test2': { name: 'vibraphone', notes: anothertestMeasure, position: 0, channelid: 'alsoFake', sampletype: 'vibraphone'}
       }
     }
   },
@@ -166,16 +177,36 @@ var Main = React.createClass({
     var newMeasures = this.state.measures
     newMeasures[newMeasure.id] = newMeasure
     this.setState({measures: newMeasures})
+    this.toggleNextLoop(newMeasure.id)
   },
   removeMeasure: function(hmid) {
-    //TODO: fix breaking when you delete focusMeasure
-
     var newMeasures = this.state.measures
     delete newMeasures[hmid]
-    this.setState({measures: newMeasures})
+
+    var index = thisLoop.indexOf(hmid)
+    if (index > -1)
+      thisLoop.splice(index, 1)
+
+    index = newNextLoop.indexOf(hmid)
+    if (index > -1)
+      newNextLoop.splice(index, 1)
+
+    if (hmid === this.state.focusId) {
+      for (var id in this.state.measures) {
+        if (id !== hmid) {
+          this.setState({
+            focusId: id, 
+            measures: newMeasures
+          })
+        }
+      }
+    } else {
+      this.setState({measures: newMeasures})
+    }
   },
   addChannel: function(channel) {
     console.log(channel)
+    audio.loadInstrument(channel.sampletype)
     var newChannels = this.state.channels
     newChannels[channel.channelid] = channel
     this.setState({channels: newChannels})
@@ -193,22 +224,27 @@ var Main = React.createClass({
     audio.doTimer(division*4, this.state.bpm, 
       function (step) {
         this.setState({playingBeat: step})
-        for (var note in this.state.measures[this.state.focusId].notes[step]) {
-          audio.playSample(this.state.measures[this.state.focusId].notes[step][note])
-        }
+          for (var i in thisLoop) {
+            var id = thisLoop[i]
+            var sampletype = this.state.measures[id].sampletype
+            if (sampletype === 'drums') {
+              for (var note in this.state.measures[id].notes[step]) {
+                audio.playSample(this.state.measures[id].notes[step][note])
+              }
+            } else {
+              for (var note in this.state.measures[id].notes[step]) {
+                audio.playSample(this.state.measures[id].notes[step][note], sampletype)
+              }
+            }
+          }
       }.bind(this),
-      function (step, repeat) {
-        if (this.state.playing) {
-          this.setState({playingBeat: -1})
-          repeat(true)
-        } else {
-          this.setState({playingBeat: -1})
-          repeat(false)
-        }
+      function (step) {
+        thisLoop = nextLoop.slice()
       }.bind(this))
   },
   stop: function() {
     this.setState({playing: false, playingBeat: -1})
+    thisLoop = nextLoop.slice()
     audio.killItAll()
   },
   userHasJoined: function(newUser) {
@@ -232,19 +268,27 @@ var Main = React.createClass({
     this.setState({measures: tempMeasures})
   },
   updateBpm: function (newBpm) {
-  	this.setState({bpm: newBpm})
-  	document.getElementById('sliderBpm').value = newBpm
+    this.setState({bpm: newBpm})
+    document.getElementById('sliderBpm').value = newBpm
     document.getElementById('textBpm').value = newBpm
   },
   loadSong: function (data) {
     var channels = {}
     for (var i=0; i<data.channels.length; i++) {
       channels[data.channels[i].id] = data.channels[i]
+      if (data.channels[i].sampletype !== 'drums') {
+        audio.loadInstrument(data.channels[i].sampletype)
+      }
     }
+    var loops = []
     var measures = {}
     for (var i=0; i<data.measures.length; i++) {
       measures[data.measures[i].hmid] = data.measures[i]
+      loops.push(data.measures[i].hmid)
     }
+    thisLoop=loops.slice()
+    nextLoop=loops.slice()
+
     this.setState({
       channels: channels, 
       measures: measures, 
@@ -287,6 +331,17 @@ var Main = React.createClass({
         channelid: this.state.measures[this.state.focusId].channelid
       }
     })
+  },
+  toggleNextLoop: function(hmid) {
+    var index = nextLoop.indexOf(hmid)
+    if (index > -1){
+      nextLoop.splice(index, 1)
+    } else {
+      nextLoop.push(hmid)
+    }
+    if (!this.state.playing) {
+      thisLoop = nextLoop.slice()
+    }
   },
   changeSongs: function(songid) {
     if (songid !== this.state.songId){

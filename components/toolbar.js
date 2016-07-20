@@ -4,12 +4,14 @@ var Toolbar = React.createClass({
       //changing div name moves off screen
       <div style={toolbarStyle}> 
         <play style={playStyle} onClick={this.props.playing ? this.props.stop : this.props.play}>
-          <img src='../assets/play.png' alt='play' style={playStyle.triangle}/> 
+          <img src='../assets/png/play.png' alt='play' style={playStyle.triangle}/> 
         </play>
+        {/*}
         <bpm>
           <input style={sliderBpmStyle} id='sliderBpm' type='range' min='60' max='240' defaultValue={this.props.bpm} onMouseUp={this.updateBpm} onChange={this.changeBpm}/>
           <input style={textBpmStyle} id='textBpm' type='text' defaultValue={this.props.bpm} onKeyPress={this.updateBpm} onBlur={this.updateBpm}/>BPM
         </bpm>
+      */}
       </div>
     )
   },

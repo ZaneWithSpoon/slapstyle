@@ -14,7 +14,7 @@ var Header = React.createClass({
             <span>SlapStyle</span>
           </div>
           <div id='searchbar' style={searchbarStyle}>
-            <img src='./assets/search.png' alt='search' style={searchbarStyle.glass}/>
+            <img src='./assets/png/search.png' alt='search' style={searchbarStyle.glass}/>
             <input id='invited' type='text' onKeyPress={this.addUser} placeholder='Invite friends by username' style={searchbarStyle.input} />
           </div>
           <div id='songList' style={songListStyle} onClick={this.showSongs}>
@@ -35,7 +35,7 @@ var Header = React.createClass({
     } else {
       return (
         <header style={headerStyle}>
-          <p style={logo}>lightBeat</p>
+          <p style={logo}>SlapStyle</p>
           <div style={loginStyle} onClick={this.props.toggleOverlay}>
             Sign In
           </div>
