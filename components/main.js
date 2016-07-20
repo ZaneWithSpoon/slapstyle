@@ -84,9 +84,11 @@ var Main = React.createClass({
         <InstrumentPanel
           channels={this.state.channels}
           measures={this.state.measures}
+          instruments={audio.instruments}
+          songId={this.state.songId}
           focusId={this.state.focusId}
           updateFocus={this.updateFocus}
-          addMeasure={this.addMeasure} />
+          socket={socket} />
       </site>
     )
   },
@@ -97,7 +99,7 @@ var Main = React.createClass({
         id: 'user-163c2b38-1007-4aaf-a234-268647bc3124',
         photo: './assets/dolphin.png'
       },
-      isLoggedIn: true,
+      isLoggedIn: false,
       isModal: false,
       roommates: [],
       playingBeat: -1,
@@ -109,10 +111,51 @@ var Main = React.createClass({
       channels: { 'fakeId': {name: 'channel', position: 0, sampletype: 'drums'},  'alsoFake': {name: 'channel 2', position: 1, sampletype: 'piano'} },
       measures: {
         'test': { name: 'measure name', notes: testMeasure, position: 0, channelid: 'fakeId', sampletype: 'drums'},
-        'test3': { name: 'measure name5', notes: anothertestMeasure, position: 1, channelid: 'fakeId', sampletype: 'drums'},
-        'test2': { name: 'measure2 name', notes: testMeasure, position: 0, channelid: 'alsoFake', sampletype: 'piano'}
+        'test3': { name: 'measure name5', notes: anothertestMeasure, position: 1, channelid: 'fakeId', sampletype: 'drums'}
       }
     }
+  },
+  socketListeners: function() {
+    var that = this
+    //room listeners
+    socket.on('user joined', function (data) {
+      console.log('received log in thing')
+      that.userHasJoined(data.user)
+      socket.emit('in room', {user: that.state.user, songid: that.state.songId, to: data.user.id})
+    })
+    socket.on('user in room', function (data) {
+      that.userHasJoined(data.user)
+    })
+    socket.on('user left', function (data) {
+      that.userHasLeft(data.user.id)
+    })
+    socket.on('new room', function (data) {
+      that.loadSong(data)
+    })
+    //measure listeners
+    socket.on('add measure', function (data) {
+      that.addMeasure(data)
+    })
+    socket.on('remove measure', function (data) {
+      that.removeMeasure(data)
+    })
+    socket.on('updated measure', function (data) {
+      that.updateMeasure(data.hmid, data.measure)
+    })
+    //channel listeners
+    socket.on('add channel', function (data) {
+      that.addChannel(data)
+    })
+    socket.on('remove channel', function (data) {
+      that.removeChannel(data)
+    })
+    //misc listeners
+    socket.on('invited', function (data) {
+      alert(data + ' has invited you to work on a song')
+    })
+    socket.on('working event', function (data) {
+      console.log(data)
+    })
   },
   updateFocus: function(newFocus) {
     if (this.state.focusId !== newFocus) {
@@ -121,19 +164,26 @@ var Main = React.createClass({
   },
   addMeasure: function(newMeasure) {
     var newMeasures = this.state.measures
-    newMeasures[newMeasure.id] = {
-      name: newMeasure.name, 
-      notes: newMeasure.notes, 
-      position: newMeasure.position, 
-      channelid: newMeasure.channelid,
-      sampletype: newMeasure.sampletype
-    }
+    newMeasures[newMeasure.id] = newMeasure
     this.setState({measures: newMeasures})
   },
   removeMeasure: function(hmid) {
+    //TODO: fix breaking when you delete focusMeasure
+
     var newMeasures = this.state.measures
     delete newMeasures[hmid]
-    this.setState({measures, newMeasures})
+    this.setState({measures: newMeasures})
+  },
+  addChannel: function(channel) {
+    console.log(channel)
+    var newChannels = this.state.channels
+    newChannels[channel.channelid] = channel
+    this.setState({channels: newChannels})
+  },
+  removeChannel: function(channelid) {
+    var newChannels = this.state.channels
+    delete newChannels[channelid]
+    this.setState({channel: newChannels})
   },
   play: function() {
     this.setState({playing: true})
@@ -176,32 +226,6 @@ var Main = React.createClass({
     })
     this.setState({roommates: newRoommates})
   },
-  socketListeners: function() {
-    var that = this
-    socket.on('user joined', function (data) {
-      console.log('received log in thing')
-      that.userHasJoined(data.user)
-      socket.emit('in room', {user: that.state.user, songid: that.state.songId, to: data.user.id})
-    })
-    socket.on('user in room', function (data) {
-      that.userHasJoined(data.user)
-    })
-    socket.on('user left', function (data) {
-      that.userHasLeft(data.user.id)
-    })
-    socket.on('new room', function (data) {
-      that.organizeHypermeasures(data)
-    })
-    socket.on('updated measure', function (data) {
-      that.updateMeasure(data.hmid, data.measure)
-    })
-    socket.on('invited', function (data) {
-      alert(data + ' has invited you to work on a song')
-    })
-    socket.on('working event', function (data) {
-      console.log(data)
-    })
-  },
   updateMeasure: function (id, replacement) {
     var tempMeasures = this.state.measures
     tempMeasures[id] = replacement
@@ -212,32 +236,19 @@ var Main = React.createClass({
   	document.getElementById('sliderBpm').value = newBpm
     document.getElementById('textBpm').value = newBpm
   },
-  organizeHypermeasures: function (hms) {
-    console.log(hms)
+  loadSong: function (data) {
     var channels = {}
-    var measures = {}
-    var focusId = ''
-
-    for (var i = 0; i < hms.length; i++) {
-      if (channels[hms[i].channelid] === undefined) {
-        channels[hms[i].channelid] = {
-          name: hms[i].channelname,
-          position: hms[i].channelposition,
-          sampletype: hms[i].sampletype
-        }
-      } 
-      measures[hms[i].hmid] = {
-        name: hms[i].hmname,
-        position: hms[i].hmposition,
-        notes: hms[i].notes,
-        sampletype: hms[i].sampletype,
-        channelid: hms[i].channelid
-      }
-      if (hms[i].channelposition === 0 && hms[i].hmposition === 0 ) {
-        focusId = hms[i].hmid
-      }
+    for (var i=0; i<data.channels.length; i++) {
+      channels[data.channels[i].id] = data.channels[i]
     }
-    this.setState({channels: channels, measures: measures, focusId: focusId})
+    var measures = {}
+    for (var i=0; i<data.measures.length; i++) {
+      measures[data.measures[i].hmid] = data.measures[i]
+    }
+    this.setState({
+      channels: channels, 
+      measures: measures, 
+      focusId: data.measures[0].hmid})
   },
   toggleOverlay: function() {
     this.setState({ isModal: (this.state.isModal) ? false : true})
@@ -305,9 +316,7 @@ var Main = React.createClass({
 })
 
 var containerStyle = {
-  display: 'flex', 
-  height: '100%', 
-  flexDirection: 'column'
+
 }
 
 export default Main

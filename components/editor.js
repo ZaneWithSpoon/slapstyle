@@ -1,6 +1,6 @@
 import { range } from 'lodash'
 
-var pianoNotes = [ 'C', 'B', 'A#', 'A', 'G#', 'G', 'F#', 'F',  'E', 'D#', 'D', 'C#']
+var pianoNotes = [ 'C5', 'B5', 'A#5', 'A5', 'G#5', 'G5', 'F#5', 'F5',  'E5', 'D#5', 'D5', 'C#5']
 
 var Editor = React.createClass({
   render: function() {
@@ -12,7 +12,7 @@ var Editor = React.createClass({
             return (
               <row key={'row'+i} style={rowStyle}>
                 <note key={note} style={noteStyle} onClick={() => this.props.audio.playSample(note)}>{note}</note>
-                {looping.map(function(beat) {
+                {looping.map(function (beat) {
                   return (
                     <div key={note + beat} style={this.isSelected(note, beat)} onClick={() => this.props.toggleNote(note, beat)}></div>
                   )
@@ -30,7 +30,7 @@ var Editor = React.createClass({
             return (
               <row key={'row'+i} style={rowStyle}>
                 <note key={note} style={noteStyle} onClick={() => this.props.audio.playSample(note)}>{note}</note>
-                {looping.map(function(beat) {
+                {looping.map(function (beat) {
                   return (
                     <div key={note + beat} style={this.isSelected(note, beat)} onClick={() => this.props.toggleNote(note, beat)}></div>
                   )

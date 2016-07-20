@@ -11,7 +11,7 @@ var Header = React.createClass({
       return (
         <header style={headerStyle}>
           <div style={logo}>
-            <span>lightBeat</span>
+            <span>SlapStyle</span>
           </div>
           <div id='searchbar' style={searchbarStyle}>
             <img src='./assets/search.png' alt='search' style={searchbarStyle.glass}/>
@@ -76,7 +76,8 @@ var Header = React.createClass({
   },
   addUser: function(e) {
     if (e.key === 'Enter') {
-      var username = document.getElementById('invited').value.toLowerCase()
+      var input = document.getElementById('invited')
+      var username = input.value.toLowerCase()
 
       $.ajax({
         url: "http://localhost:8080/username",
@@ -92,6 +93,7 @@ var Header = React.createClass({
               songid: this.props.songId
             })
             alert(username + ' has been invited to this song')
+            input.value = ''
           }
         }.bind(this),
         error: function(xhr) {
