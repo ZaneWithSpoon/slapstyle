@@ -15,7 +15,7 @@ var Editor = React.createClass({
                 <note key={note} style={noteStyle} onClick={() => this.props.audio.playSample(note)}>{note}</note>
                 {looping.map(function (beat) {
                   return (
-                    <div key={note + beat} style={this.isSelected(note, beat)} onClick={() => this.props.toggleNote(note, beat)}></div>
+                    <div key={note + beat} style={this.isSelected(note, beat)} onClick={() => this.props.isLoggedIn ? this.props.toggleNote(note, beat) : this.props.toggleOverlay()}></div>
                   )
                 }.bind(this))}
               </row>
@@ -33,7 +33,7 @@ var Editor = React.createClass({
                 <note key={note} style={noteStyle} onClick={() => this.props.audio.playSample(note, sampleType)}>{note}</note>
                 {looping.map(function (beat) {
                   return (
-                    <div key={note + beat} style={this.isSelected(note, beat)} onClick={() => this.props.toggleNote(note, beat)}></div>
+                    <div key={note + beat} style={this.isSelected(note, beat)} onClick={() => this.props.isLoggedIn ? this.props.toggleNote(note, beat) : this.props.toggleOverlay()}></div>
                   )
                 }.bind(this))}
               </row>

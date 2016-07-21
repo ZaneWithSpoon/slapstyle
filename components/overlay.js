@@ -6,24 +6,25 @@ var Overlay = React.createClass({
   render: function() {
     if (this.props.visible && !this.state.newUser) {
       return (
-        <div id='overlay' style={overlayStyle}>
-          <div id='signIn' style={popUp}>
-            <h2>Sign in to start making beautiful music</h2>
-            <GoogleLogin
-              clientId='71814263033-7qt6smjgj0pt8itgtmtcaffns0csqdg9.apps.googleusercontent.com'
-              callback={this.responseGoogle}
-              cssClass='googleStyle' />
+        <div id='overlay' style={overlayStyle} onClick={this.props.toggleOverlay}>
+          <div id='signIn' style={popUp} onClick={(e) => e.stopPropagation()}>
+            <h2>Sign in to start making beautiful music with friends!</h2>
+            <div id='signInButtons'>
+              <GoogleLogin
+                clientId='71814263033-7qt6smjgj0pt8itgtmtcaffns0csqdg9.apps.googleusercontent.com'
+                callback={this.responseGoogle}
+                cssClass='googleStyle' />
 
-            <FacebookLogin
-              appId="1612283222395868"
-              autoLoad={true}
-              fields="name,email,picture"
-              callback={this.responseFacebook} 
-              cssClass="fbStyle" 
-              size='metro' />
-
+              <FacebookLogin
+                appId="1612283222395868"
+                autoLoad={true}
+                fields="name,email,picture"
+                callback={this.responseFacebook} 
+                cssClass="fbStyle" 
+                size='metro' />
+            </div>
             {/* created css classes in index.html */}
-            <p onClick={this.props.toggleOverlay} style={{marginTop: '75px'}}>
+            <p onClick={this.props.toggleOverlay}>
               No thanks, I hate music
             </p>
           </div>
@@ -31,8 +32,8 @@ var Overlay = React.createClass({
       )
     } else if (this.props.visible && this.state.newUser) {
       return (
-        <div id='overlay' style={overlayStyle}>
-          <div id='signIn' style={popUp}>
+        <div id='overlay' style={overlayStyle} onClick={this.props.toggleOverlay}>
+          <div id='signIn' style={popUp} onClick={(e) => e.stopPropagation()}>
             <h2>Pick a username</h2>
             <div style={middleStyle} >
               <img src={this.state.userInfo.picture} alt='prof' style={picStyle} />
@@ -114,7 +115,7 @@ var Overlay = React.createClass({
   },
   findUser: function(profile) {
     $.ajax({
-      url: "http://localhost:8080/user",
+      url: this.props.ip + "/user",
       type: "get", //send it through get method
       data: {'email': profile.email},
       success: function(response) {
@@ -132,6 +133,8 @@ var Overlay = React.createClass({
     })
   },
   isValidUsername: function(param) {
+    console.log(param)
+    console.log(/^\w+$/.test(param))
     if (param === undefined || param.length <= 2){
       return false
     } else {
@@ -143,7 +146,7 @@ var Overlay = React.createClass({
 
     if (this.isValidUsername(username)) {
       $.ajax({
-        url: "http://localhost:8080/username",
+        url: this.props.ip + "/username",
         type: "get", //send it through get method
         data: {'username': username},
         success: function(response) {
@@ -181,10 +184,13 @@ var Overlay = React.createClass({
     if (!validator.isEmail(userInfo.email)) {
       err = 'Looks like that email\s no good. Try another?'
     } 
+    if (!this.isValidUsername(userInfo.username)) {
+      err = 'Please enter a valid username'
+    }
 
     if (err === '') {
       $.ajax({
-        url: "http://localhost:8080/addUser",
+        url: this.props.ip + "/addUser",
         type: "post",
         data: {user: userInfo},
         success: function(response) {
@@ -254,6 +260,18 @@ var overlayStyle = {
   backgroundColor: 'rgba(0,0,0,0.3)'
 }
 
+var hiddenOverlayStyle = {
+  visibility: 'visible',
+  position: 'absolute',
+  left: '0px',
+  top: '0px',
+  width: '100%',
+  height: '100%',
+  textAlign: 'center',
+  zIndex: '1000',
+  backgroundColor: 'rgba(0,0,0,0.3)'
+}
+
 var popUp = {
   width: '500px',
   height: '300px',
@@ -262,7 +280,11 @@ var popUp = {
   margin: 'auto',
   marginTop: '100px',
   textAlign: 'center',
-  verticalAlign: 'middle'
+  verticalAlign: 'middle',
+  borderRadius: '5px',
+  display:'flex',
+  flexDirection: 'column',
+  justifyContent: 'space-around'
 }
 
 export default Overlay

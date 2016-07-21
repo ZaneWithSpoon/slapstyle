@@ -8,7 +8,7 @@ var SongDropdown = React.createClass({
       return (
         <div id='songDropdown' tabIndex='-1' onBlur={this.props.hideSongs} style={dropdownStyle}> 
           {rows}
-          <div style={songStyle.addSong}>add song</div>
+          <div style={songStyle.addSong} onClick={() => {this.props.newSong(); this.props.hideSongs();}}>add song</div>
         </div>
       )
     } else {
@@ -54,6 +54,7 @@ var songStyle = {
   borderTop: 'grey',
   paddingLeft: '5px',
   borderTop: '1px solid #23272A',
+  cursor: 'pointer',
   title: {
     fontSize: '20px'
   },
@@ -64,7 +65,8 @@ var songStyle = {
     height: '2em',
     borderTop: 'grey',
     paddingLeft: '5px', 
-    backgroundColor: '#23272A'
+    backgroundColor: '#23272A',
+    cursor: 'pointer'
   }
 }
 

@@ -6,8 +6,11 @@ import Editor from './editor'
 import InstrumentPanel from './instrumentPanel'
 import audio from './audio'
 
+
+//server ip
+var ip = 'http://localhost:8080'
 //socket
-var socket = io.connect('http://localhost:8080')
+var socket = io.connect(ip)
 
 //preloading piano
 audio.loadInstrument('vibraphone')
@@ -22,10 +25,10 @@ var userColors = ['#1CCAD8', 'green', 'purple', 'red']
 var users = 1
 var division = 8
 var range = ['kick', 'snare', 'tom', 'hat']
+//starter measure for new songs
 var testMeasure = []
-for (var i = 0; i < division*4; i++)
+for (var i = 0; i < 8*4; i++)
   testMeasure.push([])
-
   testMeasure[0].push('kick')
   testMeasure[6].push('kick')
   testMeasure[14].push('kick')
@@ -36,23 +39,34 @@ for (var i = 0; i < division*4; i++)
   testMeasure[2].push('tom')
   testMeasure[18].push('tom')
 
-  testMeasure[0].push('hat')
-  testMeasure[2].push('hat')
-  testMeasure[4].push('hat')
-  testMeasure[6].push('hat')
-  testMeasure[7].push('hat')
-  testMeasure[8].push('hat')
-  testMeasure[10].push('hat')
-  testMeasure[14].push('hat')
-  testMeasure[16].push('hat')
-  testMeasure[18].push('hat')
-  testMeasure[20].push('hat')  
-  testMeasure[21].push('hat')
-  testMeasure[23].push('hat')
-  testMeasure[24].push('hat')
-  testMeasure[26].push('hat')
-  testMeasure[28].push('hat')
-  testMeasure[30].push('hat')
+var trapHat = []
+for (var i = 0; i < 8*4; i++)
+  trapHat.push([])
+for (var i = 0; i < 8*4; i+=2)
+  trapHat[i].push('hat')
+  trapHat[7].push('hat')
+  trapHat[15].push('hat')
+  trapHat[29].push('hat')
+
+var chords = []
+for (var i = 0; i < 8*4; i++)
+  chords.push([])
+  chords[0].push('C6')
+  chords[0].push('G5')
+  chords[0].push('E5')
+  chords[4].push('C6')
+  chords[4].push('G5')
+  chords[4].push('E5')
+  chords[10].push('C5')
+  chords[10].push('A5')
+  chords[10].push('E5')
+  chords[16].push('B5')
+  chords[16].push('G5')
+  chords[16].push('D5')
+  chords[22].push('C5')
+  chords[22].push('G5')
+  chords[22].push('E5')
+  chords[22].push('C6')
 
 var anothertestMeasure = []
 for (var i = 0; i < 8*4; i++)
@@ -63,10 +77,12 @@ var Main = React.createClass({
     return (
       <site style={containerStyle}>
         <Overlay 
+          ip={ip}
           visible={this.state.isModal} 
           toggleOverlay={this.toggleOverlay} 
           signIn={this.signIn} />
         <Header 
+          ip={ip}
           toggleOverlay={this.toggleOverlay} 
           isLoggedIn={this.state.isLoggedIn} 
           user={this.state.user} 
@@ -84,6 +100,8 @@ var Main = React.createClass({
         <Editor 
           range={range}
           audio={audio}
+          toggleOverlay={this.toggleOverlay}
+          isLoggedIn={this.state.isLoggedIn}
           measures={this.state.measures} 
           focusId={this.state.focusId}
           division={this.state.division} 
@@ -93,10 +111,13 @@ var Main = React.createClass({
           channels={this.state.channels}
           measures={this.state.measures}
           instruments={audio.instruments}
+          toggleOverlay={this.toggleOverlay}
+          isLoggedIn={this.state.isLoggedIn}
           songId={this.state.songId}
           focusId={this.state.focusId}
           updateFocus={this.updateFocus}
           toggleNextLoop={this.toggleNextLoop}
+          nextLoop={nextLoop}
           socket={socket}
           audio={audio} />
       </site>
@@ -121,8 +142,8 @@ var Main = React.createClass({
       channels: { 'fakeId': {name: 'drums', position: 0, sampletype: 'drums'},  'alsoFake': {name: 'vibraphone', position: 1, sampletype: 'vibraphone'} },
       measures: {
         'test': { name: 'trap beat', notes: testMeasure, position: 0, channelid: 'fakeId', sampletype: 'drums'},
-        'test3': { name: '4 to the floor', notes: anothertestMeasure, position: 1, channelid: 'fakeId', sampletype: 'drums'},
-        'test2': { name: 'vibraphone', notes: anothertestMeasure, position: 0, channelid: 'alsoFake', sampletype: 'vibraphone'}
+        'test3': { name: 'trap hat', notes: trapHat, position: 1, channelid: 'fakeId', sampletype: 'drums'},
+        'test2': { name: 'chord progression', notes: chords, position: 0, channelid: 'alsoFake', sampletype: 'vibraphone'}
       }
     }
   },
@@ -162,7 +183,7 @@ var Main = React.createClass({
     })
     //misc listeners
     socket.on('invited', function (data) {
-      alert(data + ' has invited you to work on a song')
+      alert(data + ' has invited you to work on a song. Find it in your song list.')
     })
     socket.on('working event', function (data) {
       console.log(data)
@@ -187,9 +208,9 @@ var Main = React.createClass({
     if (index > -1)
       thisLoop.splice(index, 1)
 
-    index = newNextLoop.indexOf(hmid)
+    index = nextLoop.indexOf(hmid)
     if (index > -1)
-      newNextLoop.splice(index, 1)
+      nextLoop.splice(index, 1)
 
     if (hmid === this.state.focusId) {
       for (var id in this.state.measures) {
@@ -298,6 +319,7 @@ var Main = React.createClass({
     this.setState({ isModal: (this.state.isModal) ? false : true})
   },
   toggleNote: function(note, beat) {
+    console.log('toggleNote')
     var newMeasure = []
 
     var found = false

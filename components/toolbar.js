@@ -3,9 +3,7 @@ var Toolbar = React.createClass({
     return (
       //changing div name moves off screen
       <div style={toolbarStyle}> 
-        <play style={playStyle} onClick={this.props.playing ? this.props.stop : this.props.play}>
-          <img src='../assets/png/play.png' alt='play' style={playStyle.triangle}/> 
-        </play>
+        <this.playStop />
         {/*}
         <bpm>
           <input style={sliderBpmStyle} id='sliderBpm' type='range' min='60' max='240' defaultValue={this.props.bpm} onMouseUp={this.updateBpm} onChange={this.changeBpm}/>
@@ -14,6 +12,21 @@ var Toolbar = React.createClass({
       */}
       </div>
     )
+  },
+  playStop: function () {
+    if (this.props.playing) {
+      return (
+        <play style={playStyle} onClick={this.props.playing ? this.props.stop : this.props.play}>
+          <img src='../assets/png/stop.png' alt='play' style={playStyle.square}/> 
+        </play>
+      )
+    } else {
+      return (
+        <play style={playStyle} onClick={this.props.playing ? this.props.stop : this.props.play}>
+          <img src='../assets/png/play.png' alt='play' style={playStyle.triangle}/> 
+        </play>
+      )      
+    }
   },
   updateBpm: function(e) {
     if (e.type === 'mouseup' || (e.type === 'keypress' && e.key === 'Enter'))
@@ -28,6 +41,7 @@ var Toolbar = React.createClass({
 
 var toolbarStyle = {
   zIndex: 1,
+  position: 'relative',
   width: '100%',
   height: '3em',
   backgroundColor: '#30353a',
@@ -40,10 +54,14 @@ var playStyle = {
   fontSize: '1.75em',
   borderRight: '2px solid #23272A',
   cursor: 'pointer',
-
-  triangle : {
-    height: '1.5em',
-    margin: 'auto'
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  triangle: {
+    height: '1.5em'
+  },
+  square: {
+    height: '1em'
   }
 }
 var sliderBpmStyle = {

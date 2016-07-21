@@ -16,11 +16,11 @@ var InstrumentPanel = React.createClass({
               <span>add more instruments</span>
             </div>
             <div id='instrumentList' 
-              style={this.state.instrumentList ? newChannelStyle.list: newChannelStyle.hiddenList} >
+              style={this.state.instrumentList ? newChannelStyle.list : newChannelStyle.hiddenList} >
 
               {this.props.instruments.map(function (name) {
                 return (
-                  <div key={name} style={newChannelStyle.instrument} onClick={() => this.addChannel(name)}>
+                  <div key={name} style={newChannelStyle.instrument} onClick={() => this.props.isLoggedIn ? this.addChannel(name) : this.props.toggleOverlay()}>
                     <img src='../assets/png/speaker.png' alt='sample' onClick={(e) => this.playSample(e, name)} style={newChannelStyle.speaker} />
                     {name}
                   </div>
@@ -48,7 +48,7 @@ var InstrumentPanel = React.createClass({
         measures.push(this.drawMeasures(this.props.measures[measure], measure))
       }
     }
-    if (measures.length === 0) {
+    if (measures.length === 0 && channel.sampletype !== 'drums') {
       return (
         <div key={id} style={channelStyle}>
           <div style={channelStyle.header}>
@@ -75,25 +75,36 @@ var InstrumentPanel = React.createClass({
     }
   },
   drawMeasures: function (measure, id) {
-    //TODO: make measures clickable everywhere except checkbox & triangle
     //TODO: make checkboxes circles with repeat symbols
     //TODO: rename measures option next to delete
     return (
       <div key={id} style={this.props.focusId === id ? channelStyle.focusContainer : channelStyle.container}>
-        <div style={channelStyle.measure}>
-          <div style={channelStyle.left} onClick={() => this.props.updateFocus(id)}>
+        <div style={channelStyle.measure} onClick={() => this.props.updateFocus(id)}>
+          <div style={channelStyle.left}>
             <span style={channelStyle.name}>{measure.name}</span>
           </div>
           <div style={channelStyle.right}>
-            <input style={{cursor: 'pointer'}} type="checkbox" defaultChecked={true} onClick={() => this.props.toggleNextLoop(id)}></input>
-            <span style={{cursor: 'pointer'}} onClick={() => this.updateOptions(id)}>&#9662;</span>
+            <this.repeatSymbol id={id}/>
+            <span style={{cursor: 'pointer'}} onClick={(e) => {e.stopPropagation(); this.updateOptions(id);}}>&#9662;</span>
           </div>
         </div>
         <div style={this.state.openOptions === id ? channelStyle.options : channelStyle.hiddenOptions}>
-          <button style={channelStyle.button} onClick={() => this.removeMeasure(id)}>delete</button>
+          <button style={channelStyle.button} onClick={() => this.props.isLoggedIn ? this.removeMeasure(id) : this.props.toggleOverlay() }>delete</button>
         </div>
       </div>
     )
+  },
+  repeatSymbol: function (props) {
+    var index = this.props.nextLoop.indexOf(props.id)
+    if (index > -1){
+      return (
+        <img src='../assets/png/repeatBlue.png' alt='repeat' style={channelStyle.repeatBlue} onClick={(e) => {e.stopPropagation(); this.props.toggleNextLoop(props.id)}}/>
+      )
+    } else {
+      return (
+        <img src='../assets/png/repeatWhite.png' alt='repeat' style={channelStyle.repeatBlue} onClick={(e) => {e.stopPropagation(); this.props.toggleNextLoop(props.id)}}/>
+      )
+    }  
   },
   playSample: function (e, name) {
     e.stopPropagation()
@@ -214,7 +225,8 @@ var channelStyle = {
     width: '12em',
     padding: '5px',
     backgroundColor: '#23272A',
-    boxShadow: '1px 1px 2px black'
+    boxShadow: '1px 1px 2px black',
+    cursor: 'pointer'
   },
   container: {
     zIndex: 0
@@ -280,14 +292,20 @@ var channelStyle = {
   right: {
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
+    alignItems: 'center'
   },
   name: {
     fontSize: '18px'
+  },
+  repeatBlue: {
+    margin: '3px',
+    height: '15px',
+    width: '15px'
   }
 }
 var panelStyle = {
-  zIndex: 2,
+  position: 'relative',
   width: '100%',
   display: 'flex',
   flexDirection: 'row',

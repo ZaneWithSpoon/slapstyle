@@ -29,7 +29,8 @@ var Header = React.createClass({
             active={this.state.dropdown} 
             songList={this.state.songList}
             changeSongs={this.props.changeSongs}
-            hideSongs={this.hideSongs} />
+            hideSongs={this.hideSongs}
+            newSong={this.newSong} />
         </header>
       )
     } else {
@@ -57,9 +58,25 @@ var Header = React.createClass({
       </div>
     )
   },
+  newSong: function() {
+    console.log('newSong')
+    $.ajax({
+      url: this.props.ip + "/newSong",
+      type: "post",
+      data: {userid: this.props.user.id},
+      success: function(response) {
+        console.log(response)
+        this.props.changeSongs(response.songid)
+      }.bind(this),
+      error: function(xhr) {
+        console.log('broke')
+        console.log(xhr)
+      }
+    })
+  },
   showSongs: function() {
     $.ajax({
-      url: "http://localhost:8080/userSongs",
+      url: this.props.ip + "/userSongs",
       type: "get", //send it through get method
       data: {'userid': this.props.user.id},
       success: function(response) {
@@ -80,7 +97,7 @@ var Header = React.createClass({
       var username = input.value.toLowerCase()
 
       $.ajax({
-        url: "http://localhost:8080/username",
+        url: this.props.ip + "/username",
         type: "get", //send it through get method
         data: {'username': username},
         success: function(response) {
@@ -177,11 +194,15 @@ var loginStyle = {
   float: 'right',
   width: '5em',
   height: '1.75em',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
   color: 'black',
   backgroundColor: 'white',
   borderRadius: '.5em',
   textAlign: 'center',
-  boxShadow: '1px 1px 2px black'
+  boxShadow: '1px 1px 2px black',
+  cursor: 'pointer'
 }
 
 export default Header
