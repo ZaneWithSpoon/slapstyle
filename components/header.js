@@ -133,6 +133,7 @@ var searchbarStyle = {
   overflow: 'hidden',
   glass: {
     height: '30px', 
+    width: '12%',
     float:'left',
     marginTop: '2px'
   },
@@ -169,7 +170,7 @@ var userStyle = {
     float: 'left'
   },
   pic: {
-    height: '87%',
+    height: '2.5em',
     marginLeft: '8px',
     marginTop: '2px',  
     boxShadow: '0px 0px 10px #1CCAD8',
@@ -178,7 +179,8 @@ var userStyle = {
 }
 var headerStyle = {
   width: '100%',
-  height: '3em'
+  minHeight: '3em',
+  maxHeight: '3em'
 }
 var logo = {
   marginTop: '10px',

@@ -83,7 +83,7 @@ var Overlay = React.createClass({
     } else if (this.isValidUsername( this.state.username )) {
       return <span>{this.state.username} is not available</span>
     } else {
-      return <span>A valid username must be at least 3 characters and contain only letters ad numbers</span>
+      return <span>A valid username must be at least 3 characters and contain only letters and numbers</span>
     }
   },
   responseFacebook: function(response) { //TODO: sign in with google fucking cookies
@@ -257,7 +257,7 @@ var overlayStyle = {
   height: '100%',
   textAlign: 'center',
   zIndex: '1000',
-  backgroundColor: 'rgba(0,0,0,0.3)'
+  backgroundColor: 'rgba(0,0,0,0.5)'
 }
 
 var hiddenOverlayStyle = {

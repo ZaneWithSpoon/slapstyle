@@ -6,25 +6,17 @@ import Editor from './editor'
 import InstrumentPanel from './instrumentPanel'
 import audio from './audio'
 
-
 //server ip
 var ip = 'http://localhost:8080'
 //socket
 var socket = io.connect(ip)
 
-//preloading piano
-audio.loadInstrument('vibraphone')
-audio.startup()
-
-//fuck you nextList thisList
-var thisLoop = ['test', 'test3', 'test2']
-var nextLoop = ['test', 'test3', 'test2']
-
 //creating empty measure for rendering editor view
-var userColors = ['#1CCAD8', 'green', 'purple', 'red']
+var userColors = ['#1CCAD8', '#1cd82a', '#d81cca', '#d82a1c']
 var users = 1
 var division = 8
 var range = ['kick', 'snare', 'tom', 'hat']
+
 //starter measure for new songs
 var testMeasure = []
 for (var i = 0; i < 8*4; i++)
@@ -68,10 +60,6 @@ for (var i = 0; i < 8*4; i++)
   chords[22].push('E5')
   chords[22].push('C6')
 
-var anothertestMeasure = []
-for (var i = 0; i < 8*4; i++)
-  anothertestMeasure.push([])
-
 var Main = React.createClass({
   render: function() {
     return (
@@ -95,8 +83,9 @@ var Main = React.createClass({
           playing={this.state.playing} 
           play={this.play}
           stop={this.stop}
-          bpm ={this.state.bpm}
-          updateBpm={this.updateBpm} />
+          bpm={this.state.bpm}
+          updateBpm={this.updateBpm}
+          waitingInstruments={this.state.waitingInstruments} />
         <Editor 
           range={range}
           audio={audio}
@@ -117,7 +106,8 @@ var Main = React.createClass({
           focusId={this.state.focusId}
           updateFocus={this.updateFocus}
           toggleNextLoop={this.toggleNextLoop}
-          nextLoop={nextLoop}
+          thisLoop={this.state.thisLoop}
+          nextLoop={this.state.nextLoop}
           socket={socket}
           audio={audio} />
       </site>
@@ -127,8 +117,8 @@ var Main = React.createClass({
     return {
       user: {
         username: 'fakeName',
-        id: 'user-163c2b38-1007-4aaf-a234-268647bc3124',
-        photo: './assets/dolphin.png'
+        id: 'user-cd955ef7-3e72-4eac-96f9-c4affd9f8b7a',
+        photo: './assets/png/dolphin.png'
       },
       isLoggedIn: false,
       isModal: false,
@@ -139,6 +129,9 @@ var Main = React.createClass({
       focusId: 'test',
       bpm: 110,
       division: division,
+      waitingInstruments: [],
+      thisLoop: ['test', 'test3', 'test2'],
+      nextLoop: ['test', 'test3', 'test2'],
       channels: { 'fakeId': {name: 'drums', position: 0, sampletype: 'drums'},  'alsoFake': {name: 'vibraphone', position: 1, sampletype: 'vibraphone'} },
       measures: {
         'test': { name: 'trap beat', notes: testMeasure, position: 0, channelid: 'fakeId', sampletype: 'drums'},
@@ -146,6 +139,10 @@ var Main = React.createClass({
         'test2': { name: 'chord progression', notes: chords, position: 0, channelid: 'alsoFake', sampletype: 'vibraphone'}
       }
     }
+  },
+  componentDidMount: function() {
+    audio.startup()
+    this.loadInstrument('vibraphone')
   },
   socketListeners: function() {
     var that = this
@@ -204,29 +201,34 @@ var Main = React.createClass({
     var newMeasures = this.state.measures
     delete newMeasures[hmid]
 
-    var index = thisLoop.indexOf(hmid)
+    var index = this.state.thisLoop.indexOf(hmid)
     if (index > -1)
-      thisLoop.splice(index, 1)
+      newThisLoop = this.state.thisLoop.splice(index, 1)
 
-    index = nextLoop.indexOf(hmid)
+    index = this.state.nextLoop.indexOf(hmid)
     if (index > -1)
-      nextLoop.splice(index, 1)
+      newNextLoop = this.state.nextLoop.splice(index, 1)
 
     if (hmid === this.state.focusId) {
       for (var id in this.state.measures) {
         if (id !== hmid) {
           this.setState({
             focusId: id, 
-            measures: newMeasures
+            measures: newMeasures,
+            thisLoop: newThisLoop,
+            nextLoop: newNextLoop
           })
         }
       }
     } else {
-      this.setState({measures: newMeasures})
+      this.setState({
+        measures: newMeasures,
+        thisLoop: newThisLoop,
+        nextLoop: newNextLoop
+      })
     }
   },
   addChannel: function(channel) {
-    console.log(channel)
     audio.loadInstrument(channel.sampletype)
     var newChannels = this.state.channels
     newChannels[channel.channelid] = channel
@@ -245,8 +247,8 @@ var Main = React.createClass({
     audio.doTimer(division*4, this.state.bpm, 
       function (step) {
         this.setState({playingBeat: step})
-          for (var i in thisLoop) {
-            var id = thisLoop[i]
+          for (var i in this.state.thisLoop) {
+            var id = this.state.thisLoop[i]
             var sampletype = this.state.measures[id].sampletype
             if (sampletype === 'drums') {
               for (var note in this.state.measures[id].notes[step]) {
@@ -260,12 +262,11 @@ var Main = React.createClass({
           }
       }.bind(this),
       function (step) {
-        thisLoop = nextLoop.slice()
+        this.setState({thisLoop: this.state.nextLoop.slice()})
       }.bind(this))
   },
   stop: function() {
-    this.setState({playing: false, playingBeat: -1})
-    thisLoop = nextLoop.slice()
+    this.setState({playing: false, playingBeat: -1, thisLoop: this.state.nextLoop.slice()})
     audio.killItAll()
   },
   userHasJoined: function(newUser) {
@@ -276,7 +277,6 @@ var Main = React.createClass({
   userHasLeft: function(userid) {
     var newRoommates = []
     this.state.roommates.map(function (user) {
-      console.log(user)
       if (user.id !== userid) {
         newRoommates.push(user)
       }
@@ -298,7 +298,7 @@ var Main = React.createClass({
     for (var i=0; i<data.channels.length; i++) {
       channels[data.channels[i].id] = data.channels[i]
       if (data.channels[i].sampletype !== 'drums') {
-        audio.loadInstrument(data.channels[i].sampletype)
+        this.loadInstrument(data.channels[i].sampletype)
       }
     }
     var loops = []
@@ -307,19 +307,37 @@ var Main = React.createClass({
       measures[data.measures[i].hmid] = data.measures[i]
       loops.push(data.measures[i].hmid)
     }
-    thisLoop=loops.slice()
-    nextLoop=loops.slice()
 
     this.setState({
       channels: channels, 
       measures: measures, 
-      focusId: data.measures[0].hmid})
+      focusId: data.measures[0].hmid,
+      thisLoop: loops.slice(),
+      nextLoop: loops.slice()
+    })
+  },
+  loadInstrument: function(instrument) {
+    var newWaiting = this.state.waitingInstruments.slice()
+    newWaiting.push(instrument)
+    this.setState({waitingInstruments: newWaiting})
+
+    audio.loadInstrument(instrument, function (instrument) {
+      var newWaiting = this.state.waitingInstruments.slice()
+      var index = newWaiting.indexOf(instrument)
+      if (index > -1)
+        newWaiting.splice(index, 1)
+
+      this.setState({waitingInstruments: newWaiting})
+    }.bind(this))
   },
   toggleOverlay: function() {
-    this.setState({ isModal: (this.state.isModal) ? false : true})
+    if (this.state.playing) {
+      this.stop()
+    } 
+      this.setState({ isModal: (this.state.isModal) ? false : true})    
   },
   toggleNote: function(note, beat) {
-    console.log('toggleNote')
+    
     var newMeasure = []
 
     var found = false
@@ -355,14 +373,17 @@ var Main = React.createClass({
     })
   },
   toggleNextLoop: function(hmid) {
-    var index = nextLoop.indexOf(hmid)
+    var index = this.state.nextLoop.indexOf(hmid)
+    var newNextLoop = this.state.nextLoop.slice()
     if (index > -1){
-      nextLoop.splice(index, 1)
+      newNextLoop.splice(index, 1)
     } else {
-      nextLoop.push(hmid)
+      newNextLoop.push(hmid)
     }
     if (!this.state.playing) {
-      thisLoop = nextLoop.slice()
+      this.setState({thisLoop: newNextLoop.slice(), nextLoop: newNextLoop})
+    } else {
+      this.setState({nextLoop: newNextLoop})
     }
   },
   changeSongs: function(songid) {
@@ -393,7 +414,9 @@ var Main = React.createClass({
 })
 
 var containerStyle = {
-
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column'
 }
 
 export default Main

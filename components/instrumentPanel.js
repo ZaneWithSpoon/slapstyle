@@ -307,12 +307,14 @@ var channelStyle = {
 var panelStyle = {
   position: 'relative',
   width: '100%',
+  minHeight: '200px',
   display: 'flex',
   flexDirection: 'row',
   paddingTop: '1em',
   paddingBottom: '1em',
   boxShadow: '0px 0px 2px black',
-  backgroundColor:'#30353a'
+  backgroundColor:'#30353a',
+  overflow: 'auto'
 }
 
 export default InstrumentPanel

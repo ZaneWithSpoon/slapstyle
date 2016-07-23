@@ -59,23 +59,19 @@ var Editor = React.createClass({
 })
 
 var drumStyle = {
+  flexGrow: 1,
   display: 'flex',
   flexDirection: 'column',
-  minHeight: '200px',
-  maxHeight: '200px',
   justifyContent: 'center',
   alignItems: 'center',
-  overflow: 'auto',
-  transition: 'minHeight maxHeight 2s'
+  overflow: 'auto'
 }
 var pianoStyle = {
+  flexGrow: 1,
   display: 'flex',
   flexDirection: 'column',
-  minHeight: '350px',
-  maxHeight: '350px',
   alignItems: 'center',
-  overflow: 'auto',
-  transition: 'maxHeight minHeight 2s'
+  overflow: 'auto'
 }
 var rowStyle = {
   display: 'flex',
@@ -83,7 +79,7 @@ var rowStyle = {
 }
 var noteStyle = {
   width: '4em',
-  minHeight: '2em',
+  minHeight: '1.5em',
   margin: '.1em',
   borderRadius: '.3em',
   textAlign: 'left',
@@ -91,31 +87,37 @@ var noteStyle = {
 }
 var selectedStyle = {
   width: '1.5em',
-  minHeight: '2em',
+  minHeight: '1.5em',
   margin: '.1em',
   borderRadius: '.3em',
   backgroundColor: '#1CCAD8',
-  cursor: 'pointer'
+  cursor: 'pointer',
+  transition: 'background-color 0.5s',
+  transitionTimingFunction: 'ease'
 }
 var evenStyle = {
   width: '1.5em',
-  height: '2em',
+  height: '1.5em',
   margin: '.1em',
   borderRadius: '.3em',
   backgroundColor: '#30353a',
-  cursor: 'pointer'
+  cursor: 'pointer',
+  transition: 'background-color 0.5s',
+  transitionTimingFunction: 'ease'
 }
 var oddStyle = {
   width: '1.5em',
-  height: '2em',
+  height: '1.5em',
   margin: '.1em',
   borderRadius: '.3em',
   backgroundColor: '#3c4348',
-  cursor: 'pointer'
+  cursor: 'pointer',
+  transition: 'background-color 0.5s',
+  transitionTimingFunction: 'ease'
 }
 var playingStyle = {
   width: '1.5em',
-  height: '2em',
+  height: '1.5em',
   margin: '.1em',
   borderRadius: '.3em',
   backgroundColor: 'white',

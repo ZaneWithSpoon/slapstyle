@@ -1023,11 +1023,7 @@ for (var i = 0; i < 8 * 4; i++) {
       focusId: data.measures[0].hmid });
   },
   toggleOverlay: function toggleOverlay() {
-    if (this.state.playing) {
-      this.setState({ playing: false, isModal: this.state.isModal ? false : true });
-    } else {
-      this.setState({ isModal: this.state.isModal ? false : true });
-    }
+    this.setState({ isModal: this.state.isModal ? false : true });
   },
   toggleNote: function toggleNote(note, beat) {
     console.log('toggleNote');
@@ -4100,13 +4096,13 @@ function normalizeEmail(email, options) {
 }
 module.exports = exports['default'];
 }); // $root/node_modules/validator/lib/normalizeEmail.js ends
-__sb_pundle_register('$root/node_modules/react-facebook-login/dist/facebook-login.js', function(module, exports){
-var __dirname = '$root/node_modules/react-facebook-login/dist',
-    __filename = '$root/node_modules/react-facebook-login/dist/facebook-login.js',
-    __require = __sb_pundle_require('$root/node_modules/react-facebook-login/dist/facebook-login.js');
+__sb_pundle_register('$root/node_modules/react-google-login/dist/google-login.js', function(module, exports){
+var __dirname = '$root/node_modules/react-google-login/dist',
+    __filename = '$root/node_modules/react-google-login/dist/google-login.js',
+    __require = __sb_pundle_require('$root/node_modules/react-google-login/dist/google-login.js');
 
 !function (e, t) {
-  "object" == typeof exports && "object" == typeof module ? module.exports = t(__require('$root/node_modules/react/react.js')) : "function" == typeof define && define.amd ? define(["react"], t) : "object" == typeof exports ? exports.FacebookLogin = t(__require('$root/node_modules/react/react.js')) : e.FacebookLogin = t(e.react);
+  "object" == typeof exports && "object" == typeof module ? module.exports = t(__require('$root/node_modules/react/react.js')) : "function" == typeof define && define.amd ? define(["react"], t) : "object" == typeof exports ? exports.GoogleLogin = t(__require('$root/node_modules/react/react.js')) : e.GoogleLogin = t(e.react);
 }(this, function (e) {
   return function (e) {
     function t(n) {
@@ -4122,7 +4118,7 @@ var __dirname = '$root/node_modules/react-facebook-login/dist',
       if (!(e instanceof t)) throw new TypeError("Cannot call a class as a function");
     }function i(e, t) {
       if (!e) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return !t || "object" != typeof t && "function" != typeof t ? e : t;
-    }function a(e, t) {
+    }function c(e, t) {
       if ("function" != typeof t && null !== t) throw new TypeError("Super expression must either be null or a function, not " + typeof t);e.prototype = Object.create(t && t.prototype, { constructor: { value: e, enumerable: !1, writable: !0, configurable: !0 } }), t && (Object.setPrototypeOf ? Object.setPrototypeOf(e, t) : e.__proto__ = t);
     }Object.defineProperty(t, "__esModule", { value: !0 });var s = function () {
       function e(e, t) {
@@ -4133,80 +4129,57 @@ var __dirname = '$root/node_modules/react-facebook-login/dist',
         return o && e(t.prototype, o), n && e(t, n), t;
       };
     }(),
-        c = o(5),
-        l = n(c),
-        p = o(3),
-        u = n(p),
-        f = function (e) {
+        l = o(3),
+        u = n(l),
+        a = function (e) {
       function t(e) {
-        r(this, t);var o = i(this, Object.getPrototypeOf(t).call(this, e));return o.responseApi = function (e) {
-          window.FB.api("/me", { fields: o.props.fields }, function (t) {
-            Object.assign(t, e), o.props.callback(t);
+        r(this, t);var o = i(this, Object.getPrototypeOf(t).call(this, e));return o.onBtnClick = o.onBtnClick.bind(o), o;
+      }return c(t, e), s(t, [{ key: "componentDidMount", value: function () {
+          var e = this.props,
+              t = e.clientId,
+              o = e.scope,
+              n = e.cookiePolicy,
+              r = e.loginHint;!function (e, t, o, n) {
+            var r = e.getElementsByTagName(t)[0],
+                i = r,
+                c = r;c = e.createElement(t), c.id = o, c.src = "//apis.google.com/js/platform.js", i.parentNode.insertBefore(c, i), c.onload = n;
+          }(document, "script", "google-login", function () {
+            var e = { client_id: t, cookiepolicy: n, login_hint: r, scope: o };window.gapi.load("auth2", function () {
+              window.gapi.auth2.init(e);
+            });
           });
-        }, o.checkLoginState = function (e) {
-          e.authResponse ? o.responseApi(e.authResponse) : o.props.callback && o.props.callback({ status: e.status });
-        }, o.click = function () {
-          var e = o.props,
-              t = e.scope,
-              n = e.appId;navigator.userAgent.match("CriOS") ? window.location.href = "https://www.facebook.com/dialog/oauth?client_id=" + n + "&redirect_uri=" + window.location.href + "&state=facebookdirect&" + t : window.FB.login(o.checkLoginState, { scope: t });
-        }, o;
-      }return a(t, e), s(t, [{ key: "componentDidMount", value: function () {
-          var e = this,
+        } }, { key: "onBtnClick", value: function () {
+          var e = window.gapi.auth2.getAuthInstance(),
               t = this.props,
-              o = t.appId,
-              n = t.xfbml,
-              r = t.cookie,
-              i = t.version,
-              a = t.autoLoad,
-              s = t.language,
-              c = document.createElement("div");c.id = "fb-root", document.body.appendChild(c), window.fbAsyncInit = function () {
-            window.FB.init({ version: "v" + i, appId: o, xfbml: n, cookie: r }), (a || window.location.search.includes("facebookdirect")) && window.FB.getLoginStatus(e.checkLoginState);
-          }, function (e, t, o) {
-            var n = e.getElementsByTagName(t)[0],
-                r = n,
-                i = n;e.getElementById(o) || (i = e.createElement(t), i.id = o, i.src = "//connect.facebook.net/" + s + "/all.js", r.parentNode.insertBefore(i, r));
-          }(document, "script", "facebook-jssdk");
-        } }, { key: "renderWithFontAwesome", value: function () {
-          var e = this.props,
-              t = e.cssClass,
-              o = e.size,
-              n = e.icon,
-              r = e.textButton;return l["default"].createElement("span", null, l["default"].createElement("link", { rel: "stylesheet", href: "//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" }), l["default"].createElement("button", { type: this.props.typeButton, className: t + " " + o, onClick: this.click }, l["default"].createElement("i", { className: "fa " + n }), " ", r), l["default"].createElement("style", { dangerouslySetInnerHTML: { __html: u["default"] } }));
+              o = t.offline,
+              n = t.redirectUri,
+              r = t.callback;if (o) {
+            var i = { redirect_uri: n };e.grantOfflineAccess(i).then(function (e) {
+              r(e);
+            });
+          } else e.signIn().then(function (e) {
+            r(e);
+          });
         } }, { key: "render", value: function () {
-          var e = this.props,
-              t = e.cssClass,
-              o = e.size,
-              n = e.icon,
-              r = e.textButton;return n ? this.renderWithFontAwesome() : l["default"].createElement("span", null, l["default"].createElement("button", { className: t + " " + o, onClick: this.click }, r), l["default"].createElement("style", { dangerouslySetInnerHTML: { __html: u["default"] } }));
+          var e = { display: "inline-block", background: "#d14836", color: "#fff", width: 190, paddingTop: 10, paddingBottom: 10, borderRadius: 2, border: "1px solid transparent", fontSize: 16, fontWeight: "bold", fontFamily: "Roboto" },
+              t = this.props,
+              o = t.cssClass,
+              n = t.buttonText,
+              r = t.children;return u["default"].createElement("button", { className: o, onClick: this.onBtnClick, style: o ? {} : e }, r ? r : n);
         } }]), t;
-    }(l["default"].Component);f.propTypes = { callback: c.PropTypes.func.isRequired, appId: c.PropTypes.string.isRequired, xfbml: c.PropTypes.bool, cookie: c.PropTypes.bool, scope: c.PropTypes.string, textButton: c.PropTypes.string, typeButton: c.PropTypes.string, autoLoad: c.PropTypes.bool, size: c.PropTypes.string, fields: c.PropTypes.string, cssClass: c.PropTypes.string, version: c.PropTypes.string, icon: c.PropTypes.string, language: c.PropTypes.string }, f.defaultProps = { textButton: "Login with Facebook", typeButton: "button", scope: "public_profile,email", xfbml: !1, cookie: !1, size: "metro", fields: "name", cssClass: "kep-login-facebook", version: "2.3", language: "en_US" }, t["default"] = f;
+    }(l.Component);a.propTypes = { callback: l.PropTypes.func.isRequired, clientId: l.PropTypes.string.isRequired, buttonText: l.PropTypes.string, offline: l.PropTypes.bool, scope: l.PropTypes.string, cssClass: l.PropTypes.string, redirectUri: l.PropTypes.string, cookiePolicy: l.PropTypes.string, loginHint: l.PropTypes.string, children: u["default"].PropTypes.node }, a.defaultProps = { buttonText: "Login with Google", scope: "profile email", redirectUri: "postmessage", cookiePolicy: "single_host_origin" }, t["default"] = a;
   }, function (e, t, o) {
     "use strict";
     function n(e) {
       return e && e.__esModule ? e : { "default": e };
     }Object.defineProperty(t, "__esModule", { value: !0 });var r = o(1),
         i = n(r);t["default"] = i["default"];
-  }, function (e, t, o) {
-    t = e.exports = o(4)(), t.push([e.id, ".kep-login-facebook{font-family:Helvetica,sans-serif;font-weight:700;-webkit-font-smoothing:antialiased;color:#fff;cursor:pointer;display:inline-block;font-size:calc(.27548vw + 12.71074px);text-decoration:none;text-transform:uppercase;transition:background-color .3s,border-color .3s;background-color:#4c69ba;border:calc(.06887vw + .67769px) solid #4c69ba;padding:calc(.34435vw + 13.38843px) calc(.34435vw + 18.38843px)}.kep-login-facebook.small{padding:calc(.34435vw + 3.38843px) calc(.34435vw + 8.38843px)}.kep-login-facebook.medium{padding:calc(.34435vw + 8.38843px) calc(.34435vw + 13.38843px)}.kep-login-facebook.metro{border-radius:0}.kep-login-facebook .fa{margin-right:calc(.34435vw + 3.38843px)}", ""]), t.locals = { "kep-login-facebook": "kep-login-facebook", small: "small", medium: "medium", metro: "metro", fa: "fa" };
-  }, function (e, t) {
-    e.exports = function () {
-      var e = [];return e.toString = function () {
-        for (var e = [], t = 0; t < this.length; t++) {
-          var o = this[t];o[2] ? e.push("@media " + o[2] + "{" + o[1] + "}") : e.push(o[1]);
-        }return e.join("");
-      }, e.i = function (t, o) {
-        "string" == typeof t && (t = [[null, t, ""]]);for (var n = {}, r = 0; r < this.length; r++) {
-          var i = this[r][0];"number" == typeof i && (n[i] = !0);
-        }for (r = 0; r < t.length; r++) {
-          var a = t[r];"number" == typeof a[0] && n[a[0]] || (o && !a[2] ? a[2] = o : o && (a[2] = "(" + a[2] + ") and (" + o + ")"), e.push(a));
-        }
-      }, e;
-    };
   }, function (t, o) {
     t.exports = e;
   }]);
 });
-}); // $root/node_modules/react-facebook-login/dist/facebook-login.js ends
+//# sourceMappingURL=google-login.js.map
+}); // $root/node_modules/react-google-login/dist/google-login.js ends
 __sb_pundle_register('$root/node_modules/react/react.js', function(module, exports){
 'use strict';
 
@@ -8009,13 +7982,13 @@ function onlyChild(children) {
 
 module.exports = onlyChild;
 }); // $root/node_modules/react/lib/onlyChild.js ends
-__sb_pundle_register('$root/node_modules/react-google-login/dist/google-login.js', function(module, exports){
-var __dirname = '$root/node_modules/react-google-login/dist',
-    __filename = '$root/node_modules/react-google-login/dist/google-login.js',
-    __require = __sb_pundle_require('$root/node_modules/react-google-login/dist/google-login.js');
+__sb_pundle_register('$root/node_modules/react-facebook-login/dist/facebook-login.js', function(module, exports){
+var __dirname = '$root/node_modules/react-facebook-login/dist',
+    __filename = '$root/node_modules/react-facebook-login/dist/facebook-login.js',
+    __require = __sb_pundle_require('$root/node_modules/react-facebook-login/dist/facebook-login.js');
 
 !function (e, t) {
-  "object" == typeof exports && "object" == typeof module ? module.exports = t(__require('$root/node_modules/react/react.js')) : "function" == typeof define && define.amd ? define(["react"], t) : "object" == typeof exports ? exports.GoogleLogin = t(__require('$root/node_modules/react/react.js')) : e.GoogleLogin = t(e.react);
+  "object" == typeof exports && "object" == typeof module ? module.exports = t(__require('$root/node_modules/react/react.js')) : "function" == typeof define && define.amd ? define(["react"], t) : "object" == typeof exports ? exports.FacebookLogin = t(__require('$root/node_modules/react/react.js')) : e.FacebookLogin = t(e.react);
 }(this, function (e) {
   return function (e) {
     function t(n) {
@@ -8031,7 +8004,7 @@ var __dirname = '$root/node_modules/react-google-login/dist',
       if (!(e instanceof t)) throw new TypeError("Cannot call a class as a function");
     }function i(e, t) {
       if (!e) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return !t || "object" != typeof t && "function" != typeof t ? e : t;
-    }function c(e, t) {
+    }function a(e, t) {
       if ("function" != typeof t && null !== t) throw new TypeError("Super expression must either be null or a function, not " + typeof t);e.prototype = Object.create(t && t.prototype, { constructor: { value: e, enumerable: !1, writable: !0, configurable: !0 } }), t && (Object.setPrototypeOf ? Object.setPrototypeOf(e, t) : e.__proto__ = t);
     }Object.defineProperty(t, "__esModule", { value: !0 });var s = function () {
       function e(e, t) {
@@ -8042,57 +8015,80 @@ var __dirname = '$root/node_modules/react-google-login/dist',
         return o && e(t.prototype, o), n && e(t, n), t;
       };
     }(),
-        l = o(3),
-        u = n(l),
-        a = function (e) {
+        c = o(5),
+        l = n(c),
+        p = o(3),
+        u = n(p),
+        f = function (e) {
       function t(e) {
-        r(this, t);var o = i(this, Object.getPrototypeOf(t).call(this, e));return o.onBtnClick = o.onBtnClick.bind(o), o;
-      }return c(t, e), s(t, [{ key: "componentDidMount", value: function () {
+        r(this, t);var o = i(this, Object.getPrototypeOf(t).call(this, e));return o.responseApi = function (e) {
+          window.FB.api("/me", { fields: o.props.fields }, function (t) {
+            Object.assign(t, e), o.props.callback(t);
+          });
+        }, o.checkLoginState = function (e) {
+          e.authResponse ? o.responseApi(e.authResponse) : o.props.callback && o.props.callback({ status: e.status });
+        }, o.click = function () {
+          var e = o.props,
+              t = e.scope,
+              n = e.appId;navigator.userAgent.match("CriOS") ? window.location.href = "https://www.facebook.com/dialog/oauth?client_id=" + n + "&redirect_uri=" + window.location.href + "&state=facebookdirect&" + t : window.FB.login(o.checkLoginState, { scope: t });
+        }, o;
+      }return a(t, e), s(t, [{ key: "componentDidMount", value: function () {
+          var e = this,
+              t = this.props,
+              o = t.appId,
+              n = t.xfbml,
+              r = t.cookie,
+              i = t.version,
+              a = t.autoLoad,
+              s = t.language,
+              c = document.createElement("div");c.id = "fb-root", document.body.appendChild(c), window.fbAsyncInit = function () {
+            window.FB.init({ version: "v" + i, appId: o, xfbml: n, cookie: r }), (a || window.location.search.includes("facebookdirect")) && window.FB.getLoginStatus(e.checkLoginState);
+          }, function (e, t, o) {
+            var n = e.getElementsByTagName(t)[0],
+                r = n,
+                i = n;e.getElementById(o) || (i = e.createElement(t), i.id = o, i.src = "//connect.facebook.net/" + s + "/all.js", r.parentNode.insertBefore(i, r));
+          }(document, "script", "facebook-jssdk");
+        } }, { key: "renderWithFontAwesome", value: function () {
           var e = this.props,
-              t = e.clientId,
-              o = e.scope,
-              n = e.cookiePolicy,
-              r = e.loginHint;!function (e, t, o, n) {
-            var r = e.getElementsByTagName(t)[0],
-                i = r,
-                c = r;c = e.createElement(t), c.id = o, c.src = "//apis.google.com/js/platform.js", i.parentNode.insertBefore(c, i), c.onload = n;
-          }(document, "script", "google-login", function () {
-            var e = { client_id: t, cookiepolicy: n, login_hint: r, scope: o };window.gapi.load("auth2", function () {
-              window.gapi.auth2.init(e);
-            });
-          });
-        } }, { key: "onBtnClick", value: function () {
-          var e = window.gapi.auth2.getAuthInstance(),
-              t = this.props,
-              o = t.offline,
-              n = t.redirectUri,
-              r = t.callback;if (o) {
-            var i = { redirect_uri: n };e.grantOfflineAccess(i).then(function (e) {
-              r(e);
-            });
-          } else e.signIn().then(function (e) {
-            r(e);
-          });
+              t = e.cssClass,
+              o = e.size,
+              n = e.icon,
+              r = e.textButton;return l["default"].createElement("span", null, l["default"].createElement("link", { rel: "stylesheet", href: "//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" }), l["default"].createElement("button", { type: this.props.typeButton, className: t + " " + o, onClick: this.click }, l["default"].createElement("i", { className: "fa " + n }), " ", r), l["default"].createElement("style", { dangerouslySetInnerHTML: { __html: u["default"] } }));
         } }, { key: "render", value: function () {
-          var e = { display: "inline-block", background: "#d14836", color: "#fff", width: 190, paddingTop: 10, paddingBottom: 10, borderRadius: 2, border: "1px solid transparent", fontSize: 16, fontWeight: "bold", fontFamily: "Roboto" },
-              t = this.props,
-              o = t.cssClass,
-              n = t.buttonText,
-              r = t.children;return u["default"].createElement("button", { className: o, onClick: this.onBtnClick, style: o ? {} : e }, r ? r : n);
+          var e = this.props,
+              t = e.cssClass,
+              o = e.size,
+              n = e.icon,
+              r = e.textButton;return n ? this.renderWithFontAwesome() : l["default"].createElement("span", null, l["default"].createElement("button", { className: t + " " + o, onClick: this.click }, r), l["default"].createElement("style", { dangerouslySetInnerHTML: { __html: u["default"] } }));
         } }]), t;
-    }(l.Component);a.propTypes = { callback: l.PropTypes.func.isRequired, clientId: l.PropTypes.string.isRequired, buttonText: l.PropTypes.string, offline: l.PropTypes.bool, scope: l.PropTypes.string, cssClass: l.PropTypes.string, redirectUri: l.PropTypes.string, cookiePolicy: l.PropTypes.string, loginHint: l.PropTypes.string, children: u["default"].PropTypes.node }, a.defaultProps = { buttonText: "Login with Google", scope: "profile email", redirectUri: "postmessage", cookiePolicy: "single_host_origin" }, t["default"] = a;
+    }(l["default"].Component);f.propTypes = { callback: c.PropTypes.func.isRequired, appId: c.PropTypes.string.isRequired, xfbml: c.PropTypes.bool, cookie: c.PropTypes.bool, scope: c.PropTypes.string, textButton: c.PropTypes.string, typeButton: c.PropTypes.string, autoLoad: c.PropTypes.bool, size: c.PropTypes.string, fields: c.PropTypes.string, cssClass: c.PropTypes.string, version: c.PropTypes.string, icon: c.PropTypes.string, language: c.PropTypes.string }, f.defaultProps = { textButton: "Login with Facebook", typeButton: "button", scope: "public_profile,email", xfbml: !1, cookie: !1, size: "metro", fields: "name", cssClass: "kep-login-facebook", version: "2.3", language: "en_US" }, t["default"] = f;
   }, function (e, t, o) {
     "use strict";
     function n(e) {
       return e && e.__esModule ? e : { "default": e };
     }Object.defineProperty(t, "__esModule", { value: !0 });var r = o(1),
         i = n(r);t["default"] = i["default"];
+  }, function (e, t, o) {
+    t = e.exports = o(4)(), t.push([e.id, ".kep-login-facebook{font-family:Helvetica,sans-serif;font-weight:700;-webkit-font-smoothing:antialiased;color:#fff;cursor:pointer;display:inline-block;font-size:calc(.27548vw + 12.71074px);text-decoration:none;text-transform:uppercase;transition:background-color .3s,border-color .3s;background-color:#4c69ba;border:calc(.06887vw + .67769px) solid #4c69ba;padding:calc(.34435vw + 13.38843px) calc(.34435vw + 18.38843px)}.kep-login-facebook.small{padding:calc(.34435vw + 3.38843px) calc(.34435vw + 8.38843px)}.kep-login-facebook.medium{padding:calc(.34435vw + 8.38843px) calc(.34435vw + 13.38843px)}.kep-login-facebook.metro{border-radius:0}.kep-login-facebook .fa{margin-right:calc(.34435vw + 3.38843px)}", ""]), t.locals = { "kep-login-facebook": "kep-login-facebook", small: "small", medium: "medium", metro: "metro", fa: "fa" };
+  }, function (e, t) {
+    e.exports = function () {
+      var e = [];return e.toString = function () {
+        for (var e = [], t = 0; t < this.length; t++) {
+          var o = this[t];o[2] ? e.push("@media " + o[2] + "{" + o[1] + "}") : e.push(o[1]);
+        }return e.join("");
+      }, e.i = function (t, o) {
+        "string" == typeof t && (t = [[null, t, ""]]);for (var n = {}, r = 0; r < this.length; r++) {
+          var i = this[r][0];"number" == typeof i && (n[i] = !0);
+        }for (r = 0; r < t.length; r++) {
+          var a = t[r];"number" == typeof a[0] && n[a[0]] || (o && !a[2] ? a[2] = o : o && (a[2] = "(" + a[2] + ") and (" + o + ")"), e.push(a));
+        }
+      }, e;
+    };
   }, function (t, o) {
     t.exports = e;
   }]);
 });
-//# sourceMappingURL=google-login.js.map
-}); // $root/node_modules/react-google-login/dist/google-login.js ends
+}); // $root/node_modules/react-facebook-login/dist/facebook-login.js ends
 __sb_pundle_register('$root/components/header.js', function(module, exports){
 'use strict';
 
@@ -25465,229 +25461,6 @@ module.exports = parser;
  * parser.freq('A') // => null
  */
 }); // $root/node_modules/note-parser/index.js ends
-__sb_pundle_register('$root/node_modules/audio-loader/lib/index.js', function(module, exports){
-'use strict';
-
-var __dirname = '$root/node_modules/audio-loader/lib',
-    __filename = '$root/node_modules/audio-loader/lib/index.js',
-    __require = __sb_pundle_require('$root/node_modules/audio-loader/lib/index.js');
-
-var base64 = __require('$root/node_modules/audio-loader/lib/base64.js');
-var fetch = __require('$root/node_modules/audio-loader/lib/fetch.js');
-
-// Given a regex, return a function that test if against a string
-function fromRegex(r) {
-  return function (o) {
-    return typeof o === 'string' && r.test(o);
-  };
-}
-// Try to apply a prefix to a name
-function prefix(pre, name) {
-  return typeof pre === 'string' ? pre + name : typeof pre === 'function' ? pre(name) : name;
-}
-
-/**
- * Load one or more audio files
- *
- *
- * Possible option keys:
- *
- * - __from__ {Function|String}: a function or string to convert from file names to urls.
- * If is a string it will be prefixed to the name:
- * `load(ac, 'snare.mp3', { from: 'http://audio.net/samples/' })`
- * If it's a function it receives the file name and should return the url as string.
- * - __only__ {Array} - when loading objects, if provided, only the given keys
- * will be included in the decoded object:
- * `load(ac, 'piano.json', { only: ['C2', 'D2'] })`
- *
- * @param {AudioContext} ac - the audio context
- * @param {Object} source - the object to be loaded
- * @param {Object} options - (Optional) the load options for that object
- * @param {Object} defaultValue - (Optional) the default value to return as
- * in a promise if not valid loader found
- */
-function load(ac, source, options, defVal) {
-  var loader =
-  // Basic audio loading
-  isArrayBuffer(source) ? loadArrayBuffer : isAudioFileName(source) ? loadAudioFile : isPromise(source) ? loadPromise
-  // Compound objects
-  : isArray(source) ? loadArrayData : isObject(source) ? loadObjectData : isJsonFileName(source) ? loadJsonFile
-  // Base64 encoded audio
-  : isBase64Audio(source) ? loadBase64Audio : isJsFileName(source) ? loadMidiJSFile : null;
-
-  var opts = options || {};
-  return loader ? loader(ac, source, opts) : defVal ? Promise.resolve(defVal) : Promise.reject('Source not valid (' + source + ')');
-}
-load.fetch = fetch;
-
-// BASIC AUDIO LOADING
-// ===================
-
-// Load (decode) an array buffer
-function isArrayBuffer(o) {
-  return o instanceof ArrayBuffer;
-}
-function loadArrayBuffer(ac, array, options) {
-  return new Promise(function (done, reject) {
-    ac.decodeAudioData(array, function (buffer) {
-      done(buffer);
-    }, function () {
-      reject("Can't decode audio data (" + array.slice(0, 30) + '...)');
-    });
-  });
-}
-
-// Load an audio filename
-var isAudioFileName = fromRegex(/\.(mp3|wav|ogg)(\?.*)?$/i);
-function loadAudioFile(ac, name, options) {
-  var url = prefix(options.from, name);
-  return load(ac, load.fetch(url, 'arraybuffer'), options);
-}
-
-// Load the result of a promise
-function isPromise(o) {
-  return o && typeof o.then === 'function';
-}
-function loadPromise(ac, promise, options) {
-  return promise.then(function (value) {
-    return load(ac, value, options);
-  });
-}
-
-// COMPOUND OBJECTS
-// ================
-
-// Try to load all the items of an array
-var isArray = Array.isArray;
-function loadArrayData(ac, array, options) {
-  return Promise.all(array.map(function (data) {
-    return load(ac, data, options, data);
-  }));
-}
-
-// Try to load all the values of a key/value object
-function isObject(o) {
-  return o && typeof o === 'object';
-}
-function loadObjectData(ac, obj, options) {
-  var dest = {};
-  var promises = Object.keys(obj).map(function (key) {
-    if (options.only && options.only.indexOf(key) === -1) return null;
-    var value = obj[key];
-    return load(ac, value, options, value).then(function (audio) {
-      dest[key] = audio;
-    });
-  });
-  return Promise.all(promises).then(function () {
-    return dest;
-  });
-}
-
-// Load the content of a JSON file
-var isJsonFileName = fromRegex(/\.json(\?.*)?$/i);
-function loadJsonFile(ac, name, options) {
-  var url = prefix(options.from, name);
-  return load(ac, load.fetch(url, 'text').then(JSON.parse), options);
-}
-
-// BASE64 ENCODED FORMATS
-// ======================
-
-// Load strings with Base64 encoded audio
-var isBase64Audio = fromRegex(/^data:audio/);
-function loadBase64Audio(ac, source, options) {
-  var i = source.indexOf(',');
-  return load(ac, base64.decode(source.slice(i + 1)).buffer, options);
-}
-
-// Load .js files with MidiJS soundfont prerendered audio
-var isJsFileName = fromRegex(/\.js(\?.*)?$/i);
-function loadMidiJSFile(ac, name, options) {
-  var url = prefix(options.from, name);
-  return load(ac, load.fetch(url, 'text').then(midiJsToJson), options);
-}
-
-// convert a MIDI.js javascript soundfont file to json
-function midiJsToJson(data) {
-  var begin = data.indexOf('MIDI.Soundfont.');
-  if (begin < 0) throw Error('Invalid MIDI.js Soundfont format');
-  begin = data.indexOf('=', begin) + 2;
-  var end = data.lastIndexOf(',');
-  return JSON.parse(data.slice(begin, end) + '}');
-}
-
-if (typeof module === 'object' && module.exports) module.exports = load;
-if (typeof window !== 'undefined') window.loadAudio = load;
-}); // $root/node_modules/audio-loader/lib/index.js ends
-__sb_pundle_register('$root/node_modules/audio-loader/lib/base64.js', function(module, exports){
-'use strict';
-
-// DECODE UTILITIES
-
-var __dirname = '$root/node_modules/audio-loader/lib',
-    __filename = '$root/node_modules/audio-loader/lib/base64.js',
-    __require = __sb_pundle_require('$root/node_modules/audio-loader/lib/base64.js');
-
-function b64ToUint6(nChr) {
-  return nChr > 64 && nChr < 91 ? nChr - 65 : nChr > 96 && nChr < 123 ? nChr - 71 : nChr > 47 && nChr < 58 ? nChr + 4 : nChr === 43 ? 62 : nChr === 47 ? 63 : 0;
-}
-
-// Decode Base64 to Uint8Array
-// ---------------------------
-function decode(sBase64, nBlocksSize) {
-  var sB64Enc = sBase64.replace(/[^A-Za-z0-9\+\/]/g, '');
-  var nInLen = sB64Enc.length;
-  var nOutLen = nBlocksSize ? Math.ceil((nInLen * 3 + 1 >> 2) / nBlocksSize) * nBlocksSize : nInLen * 3 + 1 >> 2;
-  var taBytes = new Uint8Array(nOutLen);
-
-  for (var nMod3, nMod4, nUint24 = 0, nOutIdx = 0, nInIdx = 0; nInIdx < nInLen; nInIdx++) {
-    nMod4 = nInIdx & 3;
-    nUint24 |= b64ToUint6(sB64Enc.charCodeAt(nInIdx)) << 18 - 6 * nMod4;
-    if (nMod4 === 3 || nInLen - nInIdx === 1) {
-      for (nMod3 = 0; nMod3 < 3 && nOutIdx < nOutLen; nMod3++, nOutIdx++) {
-        taBytes[nOutIdx] = nUint24 >>> (16 >>> nMod3 & 24) & 255;
-      }
-      nUint24 = 0;
-    }
-  }
-  return taBytes;
-}
-
-module.exports = { decode: decode };
-}); // $root/node_modules/audio-loader/lib/base64.js ends
-__sb_pundle_register('$root/node_modules/audio-loader/lib/fetch.js', function(module, exports){
-/* global XMLHttpRequest */
-'use strict';
-
-/**
- * Given a url and a return type, returns a promise to the content of the url
- * Basically it wraps a XMLHttpRequest into a Promise
- *
- * @param {String} url
- * @param {String} type - can be 'text' or 'arraybuffer'
- * @return {Promise}
- */
-
-var __dirname = '$root/node_modules/audio-loader/lib',
-    __filename = '$root/node_modules/audio-loader/lib/fetch.js',
-    __require = __sb_pundle_require('$root/node_modules/audio-loader/lib/fetch.js');
-
-module.exports = function (url, type) {
-  return new Promise(function (done, reject) {
-    var req = new XMLHttpRequest();
-    if (type) req.responseType = type;
-
-    req.open('GET', url);
-    req.onload = function () {
-      req.status === 200 ? done(req.response) : reject(Error(req.statusText));
-    };
-    req.onerror = function () {
-      reject(Error('Network Error'));
-    };
-    req.send();
-  });
-};
-}); // $root/node_modules/audio-loader/lib/fetch.js ends
 __sb_pundle_register('$root/node_modules/sample-player/lib/index.js', function(module, exports){
 'use strict';
 
@@ -26364,6 +26137,229 @@ var __dirname = '$root/node_modules/midimessage/dist',
 });
 //# sourceMappingURL=dist/index.js.map
 }); // $root/node_modules/midimessage/dist/index.min.js ends
+__sb_pundle_register('$root/node_modules/audio-loader/lib/index.js', function(module, exports){
+'use strict';
+
+var __dirname = '$root/node_modules/audio-loader/lib',
+    __filename = '$root/node_modules/audio-loader/lib/index.js',
+    __require = __sb_pundle_require('$root/node_modules/audio-loader/lib/index.js');
+
+var base64 = __require('$root/node_modules/audio-loader/lib/base64.js');
+var fetch = __require('$root/node_modules/audio-loader/lib/fetch.js');
+
+// Given a regex, return a function that test if against a string
+function fromRegex(r) {
+  return function (o) {
+    return typeof o === 'string' && r.test(o);
+  };
+}
+// Try to apply a prefix to a name
+function prefix(pre, name) {
+  return typeof pre === 'string' ? pre + name : typeof pre === 'function' ? pre(name) : name;
+}
+
+/**
+ * Load one or more audio files
+ *
+ *
+ * Possible option keys:
+ *
+ * - __from__ {Function|String}: a function or string to convert from file names to urls.
+ * If is a string it will be prefixed to the name:
+ * `load(ac, 'snare.mp3', { from: 'http://audio.net/samples/' })`
+ * If it's a function it receives the file name and should return the url as string.
+ * - __only__ {Array} - when loading objects, if provided, only the given keys
+ * will be included in the decoded object:
+ * `load(ac, 'piano.json', { only: ['C2', 'D2'] })`
+ *
+ * @param {AudioContext} ac - the audio context
+ * @param {Object} source - the object to be loaded
+ * @param {Object} options - (Optional) the load options for that object
+ * @param {Object} defaultValue - (Optional) the default value to return as
+ * in a promise if not valid loader found
+ */
+function load(ac, source, options, defVal) {
+  var loader =
+  // Basic audio loading
+  isArrayBuffer(source) ? loadArrayBuffer : isAudioFileName(source) ? loadAudioFile : isPromise(source) ? loadPromise
+  // Compound objects
+  : isArray(source) ? loadArrayData : isObject(source) ? loadObjectData : isJsonFileName(source) ? loadJsonFile
+  // Base64 encoded audio
+  : isBase64Audio(source) ? loadBase64Audio : isJsFileName(source) ? loadMidiJSFile : null;
+
+  var opts = options || {};
+  return loader ? loader(ac, source, opts) : defVal ? Promise.resolve(defVal) : Promise.reject('Source not valid (' + source + ')');
+}
+load.fetch = fetch;
+
+// BASIC AUDIO LOADING
+// ===================
+
+// Load (decode) an array buffer
+function isArrayBuffer(o) {
+  return o instanceof ArrayBuffer;
+}
+function loadArrayBuffer(ac, array, options) {
+  return new Promise(function (done, reject) {
+    ac.decodeAudioData(array, function (buffer) {
+      done(buffer);
+    }, function () {
+      reject("Can't decode audio data (" + array.slice(0, 30) + '...)');
+    });
+  });
+}
+
+// Load an audio filename
+var isAudioFileName = fromRegex(/\.(mp3|wav|ogg)(\?.*)?$/i);
+function loadAudioFile(ac, name, options) {
+  var url = prefix(options.from, name);
+  return load(ac, load.fetch(url, 'arraybuffer'), options);
+}
+
+// Load the result of a promise
+function isPromise(o) {
+  return o && typeof o.then === 'function';
+}
+function loadPromise(ac, promise, options) {
+  return promise.then(function (value) {
+    return load(ac, value, options);
+  });
+}
+
+// COMPOUND OBJECTS
+// ================
+
+// Try to load all the items of an array
+var isArray = Array.isArray;
+function loadArrayData(ac, array, options) {
+  return Promise.all(array.map(function (data) {
+    return load(ac, data, options, data);
+  }));
+}
+
+// Try to load all the values of a key/value object
+function isObject(o) {
+  return o && typeof o === 'object';
+}
+function loadObjectData(ac, obj, options) {
+  var dest = {};
+  var promises = Object.keys(obj).map(function (key) {
+    if (options.only && options.only.indexOf(key) === -1) return null;
+    var value = obj[key];
+    return load(ac, value, options, value).then(function (audio) {
+      dest[key] = audio;
+    });
+  });
+  return Promise.all(promises).then(function () {
+    return dest;
+  });
+}
+
+// Load the content of a JSON file
+var isJsonFileName = fromRegex(/\.json(\?.*)?$/i);
+function loadJsonFile(ac, name, options) {
+  var url = prefix(options.from, name);
+  return load(ac, load.fetch(url, 'text').then(JSON.parse), options);
+}
+
+// BASE64 ENCODED FORMATS
+// ======================
+
+// Load strings with Base64 encoded audio
+var isBase64Audio = fromRegex(/^data:audio/);
+function loadBase64Audio(ac, source, options) {
+  var i = source.indexOf(',');
+  return load(ac, base64.decode(source.slice(i + 1)).buffer, options);
+}
+
+// Load .js files with MidiJS soundfont prerendered audio
+var isJsFileName = fromRegex(/\.js(\?.*)?$/i);
+function loadMidiJSFile(ac, name, options) {
+  var url = prefix(options.from, name);
+  return load(ac, load.fetch(url, 'text').then(midiJsToJson), options);
+}
+
+// convert a MIDI.js javascript soundfont file to json
+function midiJsToJson(data) {
+  var begin = data.indexOf('MIDI.Soundfont.');
+  if (begin < 0) throw Error('Invalid MIDI.js Soundfont format');
+  begin = data.indexOf('=', begin) + 2;
+  var end = data.lastIndexOf(',');
+  return JSON.parse(data.slice(begin, end) + '}');
+}
+
+if (typeof module === 'object' && module.exports) module.exports = load;
+if (typeof window !== 'undefined') window.loadAudio = load;
+}); // $root/node_modules/audio-loader/lib/index.js ends
+__sb_pundle_register('$root/node_modules/audio-loader/lib/base64.js', function(module, exports){
+'use strict';
+
+// DECODE UTILITIES
+
+var __dirname = '$root/node_modules/audio-loader/lib',
+    __filename = '$root/node_modules/audio-loader/lib/base64.js',
+    __require = __sb_pundle_require('$root/node_modules/audio-loader/lib/base64.js');
+
+function b64ToUint6(nChr) {
+  return nChr > 64 && nChr < 91 ? nChr - 65 : nChr > 96 && nChr < 123 ? nChr - 71 : nChr > 47 && nChr < 58 ? nChr + 4 : nChr === 43 ? 62 : nChr === 47 ? 63 : 0;
+}
+
+// Decode Base64 to Uint8Array
+// ---------------------------
+function decode(sBase64, nBlocksSize) {
+  var sB64Enc = sBase64.replace(/[^A-Za-z0-9\+\/]/g, '');
+  var nInLen = sB64Enc.length;
+  var nOutLen = nBlocksSize ? Math.ceil((nInLen * 3 + 1 >> 2) / nBlocksSize) * nBlocksSize : nInLen * 3 + 1 >> 2;
+  var taBytes = new Uint8Array(nOutLen);
+
+  for (var nMod3, nMod4, nUint24 = 0, nOutIdx = 0, nInIdx = 0; nInIdx < nInLen; nInIdx++) {
+    nMod4 = nInIdx & 3;
+    nUint24 |= b64ToUint6(sB64Enc.charCodeAt(nInIdx)) << 18 - 6 * nMod4;
+    if (nMod4 === 3 || nInLen - nInIdx === 1) {
+      for (nMod3 = 0; nMod3 < 3 && nOutIdx < nOutLen; nMod3++, nOutIdx++) {
+        taBytes[nOutIdx] = nUint24 >>> (16 >>> nMod3 & 24) & 255;
+      }
+      nUint24 = 0;
+    }
+  }
+  return taBytes;
+}
+
+module.exports = { decode: decode };
+}); // $root/node_modules/audio-loader/lib/base64.js ends
+__sb_pundle_register('$root/node_modules/audio-loader/lib/fetch.js', function(module, exports){
+/* global XMLHttpRequest */
+'use strict';
+
+/**
+ * Given a url and a return type, returns a promise to the content of the url
+ * Basically it wraps a XMLHttpRequest into a Promise
+ *
+ * @param {String} url
+ * @param {String} type - can be 'text' or 'arraybuffer'
+ * @return {Promise}
+ */
+
+var __dirname = '$root/node_modules/audio-loader/lib',
+    __filename = '$root/node_modules/audio-loader/lib/fetch.js',
+    __require = __sb_pundle_require('$root/node_modules/audio-loader/lib/fetch.js');
+
+module.exports = function (url, type) {
+  return new Promise(function (done, reject) {
+    var req = new XMLHttpRequest();
+    if (type) req.responseType = type;
+
+    req.open('GET', url);
+    req.onload = function () {
+      req.status === 200 ? done(req.response) : reject(Error(req.statusText));
+    };
+    req.onerror = function () {
+      reject(Error('Network Error'));
+    };
+    req.send();
+  });
+};
+}); // $root/node_modules/audio-loader/lib/fetch.js ends
 __require('/usr/local/lib/node_modules/motion/node_modules/babel-regenerator-runtime/runtime.js');
 __require('$root');
 })();

@@ -7,7 +7,6 @@ var audio = {
   soundfonts: {},
   samples: {},
   startup: function () {
-    console.log('startup')
     this.samples['kick'] = new Audio('./assets/sounds/kick.wav')
     this.samples['snare'] = new Audio('./assets/sounds/snare.wav')
     this.samples['tom'] = new Audio('./assets/sounds/tom.wav')
@@ -16,9 +15,10 @@ var audio = {
   playMeasure: function (bpm) {
     var speed = 60000/bpm/2    
   },
-  loadInstrument: function (instrument) {
+  loadInstrument: function (instrument, loaded) {
     Soundfont.instrument(ctx, instrument).then(function (sound) {
       this.soundfonts[instrument] = sound
+      loaded(instrument)
     }.bind(this))
   },
   playSample: function (note, instrument) {

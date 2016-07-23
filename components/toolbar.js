@@ -14,18 +14,33 @@ var Toolbar = React.createClass({
     )
   },
   playStop: function () {
-    if (this.props.playing) {
-      return (
-        <play style={playStyle} onClick={this.props.playing ? this.props.stop : this.props.play}>
-          <img src='../assets/png/stop.png' alt='play' style={playStyle.square}/> 
-        </play>
-      )
+    if (this.props.waitingInstruments.length === 0) {
+    //if (false) {
+      if (this.props.playing) {
+        return (
+          <play style={playStyle} onClick={this.props.playing ? this.props.stop : this.props.play}>
+            <img src='../assets/png/stop.png' alt='play' style={playStyle.square}/> 
+          </play>
+        )
+      } else {
+        return (
+          <play style={playStyle} onClick={this.props.playing ? this.props.stop : this.props.play}>
+            <img src='../assets/png/play.png' alt='play' style={playStyle.triangle}/> 
+          </play>
+        )      
+      }
     } else {
       return (
-        <play style={playStyle} onClick={this.props.playing ? this.props.stop : this.props.play}>
-          <img src='../assets/png/play.png' alt='play' style={playStyle.triangle}/> 
+        <play style={playStyle}>
+          <div className='spinner' style={{cursor:'progress'}}>
+            <div className='rect1'></div>
+            <div className='rect2'></div>
+            <div className='rect3'></div>
+            <div className='rect4'></div>
+            <div className='rect5'></div>
+          </div>
         </play>
-      )      
+      )
     }
   },
   updateBpm: function(e) {
