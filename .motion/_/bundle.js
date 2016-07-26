@@ -726,23 +726,17 @@ function _interopRequireDefault(obj) {
 }
 
 //server ip
+//var ip = 'http://localhost:8080'
 var ip = 'http://54.211.58.93:8080';
 //socket
 var socket = io.connect(ip);
 
-//preloading piano
-_audio2.default.loadInstrument('vibraphone');
-_audio2.default.startup();
-
-//fuck you nextList thisList
-var thisLoop = ['test', 'test3', 'test2'];
-var nextLoop = ['test', 'test3', 'test2'];
-
 //creating empty measure for rendering editor view
-var userColors = ['#1CCAD8', 'green', 'purple', 'red'];
+var userColors = ['#1CCAD8', '#1cd82a', '#d81cca', '#d82a1c'];
 var users = 1;
 var division = 8;
 var range = ['kick', 'snare', 'tom', 'hat'];
+
 //starter measure for new songs
 var testMeasure = [];
 for (var i = 0; i < 8 * 4; i++) {
@@ -786,10 +780,7 @@ chords[22].push('G5');
 chords[22].push('E5');
 chords[22].push('C6');
 
-var anothertestMeasure = [];
-for (var i = 0; i < 8 * 4; i++) {
-  anothertestMeasure.push([]);
-}var Main = React.createClass({
+var Main = React.createClass({
   displayName: 'Main',
 
   render: function render() {
@@ -811,7 +802,8 @@ for (var i = 0; i < 8 * 4; i++) {
       play: this.play,
       stop: this.stop,
       bpm: this.state.bpm,
-      updateBpm: this.updateBpm }), React.createElement(_editor2.default, {
+      updateBpm: this.updateBpm,
+      waitingInstruments: this.state.waitingInstruments }), React.createElement(_editor2.default, {
       range: range,
       audio: _audio2.default,
       toggleOverlay: this.toggleOverlay,
@@ -830,7 +822,8 @@ for (var i = 0; i < 8 * 4; i++) {
       focusId: this.state.focusId,
       updateFocus: this.updateFocus,
       toggleNextLoop: this.toggleNextLoop,
-      nextLoop: nextLoop,
+      thisLoop: this.state.thisLoop,
+      nextLoop: this.state.nextLoop,
       socket: socket,
       audio: _audio2.default }));
   },
@@ -838,8 +831,8 @@ for (var i = 0; i < 8 * 4; i++) {
     return {
       user: {
         username: 'fakeName',
-        id: 'user-163c2b38-1007-4aaf-a234-268647bc3124',
-        photo: './assets/dolphin.png'
+        id: 'user-cd955ef7-3e72-4eac-96f9-c4affd9f8b7a',
+        photo: './assets/png/dolphin.png'
       },
       isLoggedIn: false,
       isModal: false,
@@ -850,6 +843,9 @@ for (var i = 0; i < 8 * 4; i++) {
       focusId: 'test',
       bpm: 110,
       division: division,
+      waitingInstruments: [],
+      thisLoop: ['test', 'test3', 'test2'],
+      nextLoop: ['test', 'test3', 'test2'],
       channels: { 'fakeId': { name: 'drums', position: 0, sampletype: 'drums' }, 'alsoFake': { name: 'vibraphone', position: 1, sampletype: 'vibraphone' } },
       measures: {
         'test': { name: 'trap beat', notes: testMeasure, position: 0, channelid: 'fakeId', sampletype: 'drums' },
@@ -857,6 +853,10 @@ for (var i = 0; i < 8 * 4; i++) {
         'test2': { name: 'chord progression', notes: chords, position: 0, channelid: 'alsoFake', sampletype: 'vibraphone' }
       }
     };
+  },
+  componentDidMount: function componentDidMount() {
+    _audio2.default.startup();
+    this.loadInstrument('vibraphone');
   },
   socketListeners: function socketListeners() {
     var that = this;
@@ -915,27 +915,35 @@ for (var i = 0; i < 8 * 4; i++) {
     var newMeasures = this.state.measures;
     delete newMeasures[hmid];
 
-    var index = thisLoop.indexOf(hmid);
-    if (index > -1) thisLoop.splice(index, 1);
+    var newThisLoop = this.state.thisLoop.slice();
+    var newNextLoop = this.state.nextLoop.slice();
 
-    index = nextLoop.indexOf(hmid);
-    if (index > -1) nextLoop.splice(index, 1);
+    var index = newThisLoop.indexOf(hmid);
+    if (index > -1) newThisLoop.splice(index, 1);
+
+    index = newNextLoop.indexOf(hmid);
+    if (index > -1) newNextLoop.splice(index, 1);
 
     if (hmid === this.state.focusId) {
       for (var id in this.state.measures) {
         if (id !== hmid) {
           this.setState({
             focusId: id,
-            measures: newMeasures
+            measures: newMeasures,
+            thisLoop: newThisLoop,
+            nextLoop: newNextLoop
           });
         }
       }
     } else {
-      this.setState({ measures: newMeasures });
+      this.setState({
+        measures: newMeasures,
+        thisLoop: newThisLoop,
+        nextLoop: newNextLoop
+      });
     }
   },
   addChannel: function addChannel(channel) {
-    console.log(channel);
     _audio2.default.loadInstrument(channel.sampletype);
     var newChannels = this.state.channels;
     newChannels[channel.channelid] = channel;
@@ -953,8 +961,8 @@ for (var i = 0; i < 8 * 4; i++) {
   playMeasure: function playMeasure(hmid) {
     _audio2.default.doTimer(division * 4, this.state.bpm, function (step) {
       this.setState({ playingBeat: step });
-      for (var i in thisLoop) {
-        var id = thisLoop[i];
+      for (var i in this.state.thisLoop) {
+        var id = this.state.thisLoop[i];
         var sampletype = this.state.measures[id].sampletype;
         if (sampletype === 'drums') {
           for (var note in this.state.measures[id].notes[step]) {
@@ -967,12 +975,11 @@ for (var i = 0; i < 8 * 4; i++) {
         }
       }
     }.bind(this), function (step) {
-      thisLoop = nextLoop.slice();
+      this.setState({ thisLoop: this.state.nextLoop.slice() });
     }.bind(this));
   },
   stop: function stop() {
-    this.setState({ playing: false, playingBeat: -1 });
-    thisLoop = nextLoop.slice();
+    this.setState({ playing: false, playingBeat: -1, thisLoop: this.state.nextLoop.slice() });
     _audio2.default.killItAll();
   },
   userHasJoined: function userHasJoined(newUser) {
@@ -983,7 +990,6 @@ for (var i = 0; i < 8 * 4; i++) {
   userHasLeft: function userHasLeft(userid) {
     var newRoommates = [];
     this.state.roommates.map(function (user) {
-      console.log(user);
       if (user.id !== userid) {
         newRoommates.push(user);
       }
@@ -1005,7 +1011,7 @@ for (var i = 0; i < 8 * 4; i++) {
     for (var i = 0; i < data.channels.length; i++) {
       channels[data.channels[i].id] = data.channels[i];
       if (data.channels[i].sampletype !== 'drums') {
-        _audio2.default.loadInstrument(data.channels[i].sampletype);
+        this.loadInstrument(data.channels[i].sampletype);
       }
     }
     var loops = [];
@@ -1014,23 +1020,36 @@ for (var i = 0; i < 8 * 4; i++) {
       measures[data.measures[i].hmid] = data.measures[i];
       loops.push(data.measures[i].hmid);
     }
-    thisLoop = loops.slice();
-    nextLoop = loops.slice();
 
     this.setState({
       channels: channels,
       measures: measures,
-      focusId: data.measures[0].hmid });
+      focusId: data.measures[0].hmid,
+      thisLoop: loops.slice(),
+      nextLoop: loops.slice()
+    });
+  },
+  loadInstrument: function loadInstrument(instrument) {
+    var newWaiting = this.state.waitingInstruments.slice();
+    newWaiting.push(instrument);
+    this.setState({ waitingInstruments: newWaiting });
+
+    _audio2.default.loadInstrument(instrument, function (instrument) {
+      var newWaiting = this.state.waitingInstruments.slice();
+      var index = newWaiting.indexOf(instrument);
+      if (index > -1) newWaiting.splice(index, 1);
+
+      this.setState({ waitingInstruments: newWaiting });
+    }.bind(this));
   },
   toggleOverlay: function toggleOverlay() {
     if (this.state.playing) {
-      this.setState({ playing: false, isModal: this.state.isModal ? false : true });
-    } else {
-      this.setState({ isModal: this.state.isModal ? false : true });
+      this.stop();
     }
+    this.setState({ isModal: this.state.isModal ? false : true });
   },
   toggleNote: function toggleNote(note, beat) {
-    console.log('toggleNote');
+
     var newMeasure = [];
 
     var found = false;
@@ -1066,14 +1085,17 @@ for (var i = 0; i < 8 * 4; i++) {
     });
   },
   toggleNextLoop: function toggleNextLoop(hmid) {
-    var index = nextLoop.indexOf(hmid);
+    var index = this.state.nextLoop.indexOf(hmid);
+    var newNextLoop = this.state.nextLoop.slice();
     if (index > -1) {
-      nextLoop.splice(index, 1);
+      newNextLoop.splice(index, 1);
     } else {
-      nextLoop.push(hmid);
+      newNextLoop.push(hmid);
     }
     if (!this.state.playing) {
-      thisLoop = nextLoop.slice();
+      this.setState({ thisLoop: newNextLoop.slice(), nextLoop: newNextLoop });
+    } else {
+      this.setState({ nextLoop: newNextLoop });
     }
   },
   changeSongs: function changeSongs(songid) {
@@ -1103,7 +1125,11 @@ for (var i = 0; i < 8 * 4; i++) {
   }
 });
 
-var containerStyle = {};
+var containerStyle = {
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column'
+};
 
 exports.default = Main;
 }); // $root/components/main.js ends
@@ -1187,7 +1213,7 @@ var Overlay = React.createClass({
     } else if (this.isValidUsername(this.state.username)) {
       return React.createElement('span', null, this.state.username, ' is not available');
     } else {
-      return React.createElement('span', null, 'A valid username must be at least 3 characters and contain only letters ad numbers');
+      return React.createElement('span', null, 'A valid username must be at least 3 characters and contain only letters and numbers');
     }
   },
   responseFacebook: function responseFacebook(response) {
@@ -1219,8 +1245,10 @@ var Overlay = React.createClass({
     }
   },
   findUser: function findUser(profile) {
+    var address = this.props.ip + "/user";
+    console.log(address);
     $.ajax({
-      url: this.props.ip + "/user",
+      url: address,
       type: "get", //send it through get method
       data: { 'email': profile.email },
       success: function (response) {
@@ -1232,7 +1260,7 @@ var Overlay = React.createClass({
         }
       }.bind(this),
       error: function error(xhr) {
-        console.log('broke');
+        console.log('couldn\'t sign in proprely');
         console.log(xhr);
       }
     });
@@ -1363,7 +1391,7 @@ var overlayStyle = {
   height: '100%',
   textAlign: 'center',
   zIndex: '1000',
-  backgroundColor: 'rgba(0,0,0,0.3)'
+  backgroundColor: 'rgba(0,0,0,0.5)'
 };
 
 var hiddenOverlayStyle = {
@@ -5225,7 +5253,7 @@ var DEFAULT_POOLER = oneArgumentPooler;
  * Augments `CopyConstructor` to be a poolable class, augmenting only the class
  * itself (statically) not adding any prototypical fields. Any CopyConstructor
  * you give this may have a `poolSize` property, and will look for a
- * prototypical `destructor` on instances (optional).
+ * prototypical `destructor` on instances.
  *
  * @param {Function} CopyConstructor Constructor that can be used to reset.
  * @param {Function} pooler Customizable pooler.
@@ -5317,6 +5345,7 @@ __sb_pundle_register('$root/node_modules/react/lib/reactProdInvariant.js', funct
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  * @providesModule reactProdInvariant
+ * 
  */
 'use strict';
 
@@ -5527,6 +5556,7 @@ __sb_pundle_register('$root/node_modules/react/lib/getIteratorFn.js', function(m
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  * @providesModule getIteratorFn
+ * 
  */
 
 'use strict';
@@ -5573,6 +5603,7 @@ __sb_pundle_register('$root/node_modules/react/lib/KeyEscapeUtils.js', function(
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  * @providesModule KeyEscapeUtils
+ * 
  */
 
 'use strict';
@@ -5580,7 +5611,7 @@ __sb_pundle_register('$root/node_modules/react/lib/KeyEscapeUtils.js', function(
 /**
  * Escape and wrap key so it is safe to use as a reactid
  *
- * @param {*} key to be escaped.
+ * @param {string} key to be escaped.
  * @return {string} the escaped key.
  */
 
@@ -5796,9 +5827,10 @@ var __dirname = '$root/node_modules/react/lib',
 
 var warning = __require('$root/node_modules/fbjs/lib/warning.js');
 
-function warnTDZ(publicInstance, callerName) {
+function warnNoop(publicInstance, callerName) {
   if ("production" !== 'production') {
-    "production" !== 'production' ? warning(false, '%s(...): Can only update a mounted or mounting component. ' + 'This usually means you called %s() on an unmounted component. ' + 'This is a no-op. Please check the code for the %s component.', callerName, callerName, publicInstance.constructor && publicInstance.constructor.displayName || '') : void 0;
+    var constructor = publicInstance.constructor;
+    "production" !== 'production' ? warning(false, '%s(...): Can only update a mounted or mounting component. ' + 'This usually means you called %s() on an unmounted component. ' + 'This is a no-op. Please check the code for the %s component.', callerName, callerName, constructor && (constructor.displayName || constructor.name) || 'ReactClass') : void 0;
   }
 }
 
@@ -5842,7 +5874,7 @@ var ReactNoopUpdateQueue = {
    * @internal
    */
   enqueueForceUpdate: function (publicInstance) {
-    warnTDZ(publicInstance, 'forceUpdate');
+    warnNoop(publicInstance, 'forceUpdate');
   },
 
   /**
@@ -5857,7 +5889,7 @@ var ReactNoopUpdateQueue = {
    * @internal
    */
   enqueueReplaceState: function (publicInstance, completeState) {
-    warnTDZ(publicInstance, 'replaceState');
+    warnNoop(publicInstance, 'replaceState');
   },
 
   /**
@@ -5871,7 +5903,7 @@ var ReactNoopUpdateQueue = {
    * @internal
    */
   enqueueSetState: function (publicInstance, partialState) {
-    warnTDZ(publicInstance, 'setState');
+    warnNoop(publicInstance, 'setState');
   }
 };
 
@@ -7215,10 +7247,6 @@ function updateTree(id, update) {
       isMounted: false,
       updateCount: 0
     };
-    // TODO: We need to do this awkward dance because TopLevelWrapper "never
-    // gets mounted" but its display name gets set in instantiateReactComponent
-    // before its debug ID is set to 0.
-    unmountedIDs[id] = true;
   }
   update(tree[id]);
 }
@@ -7304,7 +7332,6 @@ var ReactComponentTreeDevtool = {
     updateTree(id, function (item) {
       return item.isMounted = true;
     });
-    delete unmountedIDs[id];
   },
   onMountRootComponent: function (id) {
     rootIDs[id] = true;
@@ -7423,7 +7450,6 @@ var __dirname = '$root/node_modules/react/lib',
 
 var _prodInvariant = __require('$root/node_modules/react/lib/reactProdInvariant.js');
 
-var ReactComponentTreeDevtool = __require('$root/node_modules/react/lib/ReactComponentTreeDevtool.js');
 var ReactPropTypeLocationNames = __require('$root/node_modules/react/lib/ReactPropTypeLocationNames.js');
 
 var invariant = __require('$root/node_modules/fbjs/lib/invariant.js');
@@ -7466,10 +7492,13 @@ function checkReactTypeSpec(typeSpecs, values, location, componentName, element,
 
         var componentStackInfo = '';
 
-        if (debugID !== null) {
-          componentStackInfo = ReactComponentTreeDevtool.getStackAddendumByID(debugID);
-        } else if (element !== null) {
-          componentStackInfo = ReactComponentTreeDevtool.getCurrentStackAddendum(element);
+        if ("production" !== 'production') {
+          var ReactComponentTreeDevtool = __require('$root/node_modules/react/lib/ReactComponentTreeDevtool.js');
+          if (debugID !== null) {
+            componentStackInfo = ReactComponentTreeDevtool.getStackAddendumByID(debugID);
+          } else if (element !== null) {
+            componentStackInfo = ReactComponentTreeDevtool.getCurrentStackAddendum(element);
+          }
         }
 
         "production" !== 'production' ? warning(false, 'Failed %s type: %s%s', location, error.message, componentStackInfo) : void 0;
@@ -7963,7 +7992,7 @@ var __dirname = '$root/node_modules/react/lib',
     __filename = '$root/node_modules/react/lib/ReactVersion.js',
     __require = __sb_pundle_require('$root/node_modules/react/lib/ReactVersion.js');
 
-module.exports = '15.2.0';
+module.exports = '15.2.1';
 }); // $root/node_modules/react/lib/ReactVersion.js ends
 __sb_pundle_register('$root/node_modules/react/lib/onlyChild.js', function(module, exports){
 /**
@@ -8216,6 +8245,7 @@ var searchbarStyle = {
   overflow: 'hidden',
   glass: {
     height: '30px',
+    width: '12%',
     float: 'left',
     marginTop: '2px'
   },
@@ -8252,7 +8282,7 @@ var userStyle = {
     float: 'left'
   },
   pic: {
-    height: '87%',
+    height: '2.5em',
     marginLeft: '8px',
     marginTop: '2px',
     boxShadow: '0px 0px 10px #1CCAD8',
@@ -8261,7 +8291,8 @@ var userStyle = {
 };
 var headerStyle = {
   width: '100%',
-  height: '3em'
+  minHeight: '3em',
+  maxHeight: '3em'
 };
 var logo = {
   marginTop: '10px',
@@ -8394,10 +8425,15 @@ var Toolbar = React.createClass({
     return React.createElement('div', { style: toolbarStyle }, React.createElement(this.playStop, null));
   },
   playStop: function playStop() {
-    if (this.props.playing) {
-      return React.createElement('play', { style: playStyle, onClick: this.props.playing ? this.props.stop : this.props.play }, React.createElement('img', { src: '../assets/png/stop.png', alt: 'play', style: playStyle.square }));
+    if (this.props.waitingInstruments.length === 0) {
+      //if (false) {
+      if (this.props.playing) {
+        return React.createElement('play', { style: playStyle, onClick: this.props.playing ? this.props.stop : this.props.play }, React.createElement('img', { src: '../assets/png/stop.png', alt: 'play', style: playStyle.square }));
+      } else {
+        return React.createElement('play', { style: playStyle, onClick: this.props.playing ? this.props.stop : this.props.play }, React.createElement('img', { src: '../assets/png/play.png', alt: 'play', style: playStyle.triangle }));
+      }
     } else {
-      return React.createElement('play', { style: playStyle, onClick: this.props.playing ? this.props.stop : this.props.play }, React.createElement('img', { src: '../assets/png/play.png', alt: 'play', style: playStyle.triangle }));
+      return React.createElement('play', { style: playStyle }, React.createElement('div', { className: 'spinner', style: { cursor: 'progress' } }, React.createElement('div', { className: 'rect1' }), React.createElement('div', { className: 'rect2' }), React.createElement('div', { className: 'rect3' }), React.createElement('div', { className: 'rect4' }), React.createElement('div', { className: 'rect5' })));
     }
   },
   updateBpm: function updateBpm(e) {
@@ -8514,23 +8550,19 @@ var Editor = React.createClass({
 });
 
 var drumStyle = {
+  flexGrow: 1,
   display: 'flex',
   flexDirection: 'column',
-  minHeight: '200px',
-  maxHeight: '200px',
   justifyContent: 'center',
   alignItems: 'center',
-  overflow: 'auto',
-  transition: 'minHeight maxHeight 2s'
+  overflow: 'auto'
 };
 var pianoStyle = {
+  flexGrow: 1,
   display: 'flex',
   flexDirection: 'column',
-  minHeight: '350px',
-  maxHeight: '350px',
   alignItems: 'center',
-  overflow: 'auto',
-  transition: 'maxHeight minHeight 2s'
+  overflow: 'auto'
 };
 var rowStyle = {
   display: 'flex',
@@ -8538,7 +8570,7 @@ var rowStyle = {
 };
 var noteStyle = {
   width: '4em',
-  minHeight: '2em',
+  minHeight: '1.5em',
   margin: '.1em',
   borderRadius: '.3em',
   textAlign: 'left',
@@ -8546,31 +8578,37 @@ var noteStyle = {
 };
 var selectedStyle = {
   width: '1.5em',
-  minHeight: '2em',
+  minHeight: '1.5em',
   margin: '.1em',
   borderRadius: '.3em',
   backgroundColor: '#1CCAD8',
-  cursor: 'pointer'
+  cursor: 'pointer',
+  transition: 'background-color 0.5s',
+  transitionTimingFunction: 'ease'
 };
 var evenStyle = {
   width: '1.5em',
-  height: '2em',
+  height: '1.5em',
   margin: '.1em',
   borderRadius: '.3em',
   backgroundColor: '#30353a',
-  cursor: 'pointer'
+  cursor: 'pointer',
+  transition: 'background-color 0.5s',
+  transitionTimingFunction: 'ease'
 };
 var oddStyle = {
   width: '1.5em',
-  height: '2em',
+  height: '1.5em',
   margin: '.1em',
   borderRadius: '.3em',
   backgroundColor: '#3c4348',
-  cursor: 'pointer'
+  cursor: 'pointer',
+  transition: 'background-color 0.5s',
+  transitionTimingFunction: 'ease'
 };
 var playingStyle = {
   width: '1.5em',
-  height: '2em',
+  height: '1.5em',
   margin: '.1em',
   borderRadius: '.3em',
   backgroundColor: 'white',
@@ -24975,12 +25013,14 @@ var channelStyle = {
 var panelStyle = {
   position: 'relative',
   width: '100%',
+  minHeight: '100px',
   display: 'flex',
   flexDirection: 'row',
   paddingTop: '1em',
   paddingBottom: '1em',
   boxShadow: '0px 0px 2px black',
-  backgroundColor: '#30353a'
+  backgroundColor: '#30353a',
+  overflow: 'auto'
 };
 
 exports.default = InstrumentPanel;
@@ -25012,7 +25052,6 @@ var audio = {
   soundfonts: {},
   samples: {},
   startup: function startup() {
-    console.log('startup');
     this.samples['kick'] = new Audio('./assets/sounds/kick.wav');
     this.samples['snare'] = new Audio('./assets/sounds/snare.wav');
     this.samples['tom'] = new Audio('./assets/sounds/tom.wav');
@@ -25021,9 +25060,10 @@ var audio = {
   playMeasure: function playMeasure(bpm) {
     var speed = 60000 / bpm / 2;
   },
-  loadInstrument: function loadInstrument(instrument) {
+  loadInstrument: function loadInstrument(instrument, loaded) {
     _soundfontPlayer2.default.instrument(ctx, instrument).then(function (sound) {
       this.soundfonts[instrument] = sound;
+      loaded(instrument);
     }.bind(this));
   },
   playSample: function playSample(note, instrument) {
@@ -25465,229 +25505,6 @@ module.exports = parser;
  * parser.freq('A') // => null
  */
 }); // $root/node_modules/note-parser/index.js ends
-__sb_pundle_register('$root/node_modules/audio-loader/lib/index.js', function(module, exports){
-'use strict';
-
-var __dirname = '$root/node_modules/audio-loader/lib',
-    __filename = '$root/node_modules/audio-loader/lib/index.js',
-    __require = __sb_pundle_require('$root/node_modules/audio-loader/lib/index.js');
-
-var base64 = __require('$root/node_modules/audio-loader/lib/base64.js');
-var fetch = __require('$root/node_modules/audio-loader/lib/fetch.js');
-
-// Given a regex, return a function that test if against a string
-function fromRegex(r) {
-  return function (o) {
-    return typeof o === 'string' && r.test(o);
-  };
-}
-// Try to apply a prefix to a name
-function prefix(pre, name) {
-  return typeof pre === 'string' ? pre + name : typeof pre === 'function' ? pre(name) : name;
-}
-
-/**
- * Load one or more audio files
- *
- *
- * Possible option keys:
- *
- * - __from__ {Function|String}: a function or string to convert from file names to urls.
- * If is a string it will be prefixed to the name:
- * `load(ac, 'snare.mp3', { from: 'http://audio.net/samples/' })`
- * If it's a function it receives the file name and should return the url as string.
- * - __only__ {Array} - when loading objects, if provided, only the given keys
- * will be included in the decoded object:
- * `load(ac, 'piano.json', { only: ['C2', 'D2'] })`
- *
- * @param {AudioContext} ac - the audio context
- * @param {Object} source - the object to be loaded
- * @param {Object} options - (Optional) the load options for that object
- * @param {Object} defaultValue - (Optional) the default value to return as
- * in a promise if not valid loader found
- */
-function load(ac, source, options, defVal) {
-  var loader =
-  // Basic audio loading
-  isArrayBuffer(source) ? loadArrayBuffer : isAudioFileName(source) ? loadAudioFile : isPromise(source) ? loadPromise
-  // Compound objects
-  : isArray(source) ? loadArrayData : isObject(source) ? loadObjectData : isJsonFileName(source) ? loadJsonFile
-  // Base64 encoded audio
-  : isBase64Audio(source) ? loadBase64Audio : isJsFileName(source) ? loadMidiJSFile : null;
-
-  var opts = options || {};
-  return loader ? loader(ac, source, opts) : defVal ? Promise.resolve(defVal) : Promise.reject('Source not valid (' + source + ')');
-}
-load.fetch = fetch;
-
-// BASIC AUDIO LOADING
-// ===================
-
-// Load (decode) an array buffer
-function isArrayBuffer(o) {
-  return o instanceof ArrayBuffer;
-}
-function loadArrayBuffer(ac, array, options) {
-  return new Promise(function (done, reject) {
-    ac.decodeAudioData(array, function (buffer) {
-      done(buffer);
-    }, function () {
-      reject("Can't decode audio data (" + array.slice(0, 30) + '...)');
-    });
-  });
-}
-
-// Load an audio filename
-var isAudioFileName = fromRegex(/\.(mp3|wav|ogg)(\?.*)?$/i);
-function loadAudioFile(ac, name, options) {
-  var url = prefix(options.from, name);
-  return load(ac, load.fetch(url, 'arraybuffer'), options);
-}
-
-// Load the result of a promise
-function isPromise(o) {
-  return o && typeof o.then === 'function';
-}
-function loadPromise(ac, promise, options) {
-  return promise.then(function (value) {
-    return load(ac, value, options);
-  });
-}
-
-// COMPOUND OBJECTS
-// ================
-
-// Try to load all the items of an array
-var isArray = Array.isArray;
-function loadArrayData(ac, array, options) {
-  return Promise.all(array.map(function (data) {
-    return load(ac, data, options, data);
-  }));
-}
-
-// Try to load all the values of a key/value object
-function isObject(o) {
-  return o && typeof o === 'object';
-}
-function loadObjectData(ac, obj, options) {
-  var dest = {};
-  var promises = Object.keys(obj).map(function (key) {
-    if (options.only && options.only.indexOf(key) === -1) return null;
-    var value = obj[key];
-    return load(ac, value, options, value).then(function (audio) {
-      dest[key] = audio;
-    });
-  });
-  return Promise.all(promises).then(function () {
-    return dest;
-  });
-}
-
-// Load the content of a JSON file
-var isJsonFileName = fromRegex(/\.json(\?.*)?$/i);
-function loadJsonFile(ac, name, options) {
-  var url = prefix(options.from, name);
-  return load(ac, load.fetch(url, 'text').then(JSON.parse), options);
-}
-
-// BASE64 ENCODED FORMATS
-// ======================
-
-// Load strings with Base64 encoded audio
-var isBase64Audio = fromRegex(/^data:audio/);
-function loadBase64Audio(ac, source, options) {
-  var i = source.indexOf(',');
-  return load(ac, base64.decode(source.slice(i + 1)).buffer, options);
-}
-
-// Load .js files with MidiJS soundfont prerendered audio
-var isJsFileName = fromRegex(/\.js(\?.*)?$/i);
-function loadMidiJSFile(ac, name, options) {
-  var url = prefix(options.from, name);
-  return load(ac, load.fetch(url, 'text').then(midiJsToJson), options);
-}
-
-// convert a MIDI.js javascript soundfont file to json
-function midiJsToJson(data) {
-  var begin = data.indexOf('MIDI.Soundfont.');
-  if (begin < 0) throw Error('Invalid MIDI.js Soundfont format');
-  begin = data.indexOf('=', begin) + 2;
-  var end = data.lastIndexOf(',');
-  return JSON.parse(data.slice(begin, end) + '}');
-}
-
-if (typeof module === 'object' && module.exports) module.exports = load;
-if (typeof window !== 'undefined') window.loadAudio = load;
-}); // $root/node_modules/audio-loader/lib/index.js ends
-__sb_pundle_register('$root/node_modules/audio-loader/lib/base64.js', function(module, exports){
-'use strict';
-
-// DECODE UTILITIES
-
-var __dirname = '$root/node_modules/audio-loader/lib',
-    __filename = '$root/node_modules/audio-loader/lib/base64.js',
-    __require = __sb_pundle_require('$root/node_modules/audio-loader/lib/base64.js');
-
-function b64ToUint6(nChr) {
-  return nChr > 64 && nChr < 91 ? nChr - 65 : nChr > 96 && nChr < 123 ? nChr - 71 : nChr > 47 && nChr < 58 ? nChr + 4 : nChr === 43 ? 62 : nChr === 47 ? 63 : 0;
-}
-
-// Decode Base64 to Uint8Array
-// ---------------------------
-function decode(sBase64, nBlocksSize) {
-  var sB64Enc = sBase64.replace(/[^A-Za-z0-9\+\/]/g, '');
-  var nInLen = sB64Enc.length;
-  var nOutLen = nBlocksSize ? Math.ceil((nInLen * 3 + 1 >> 2) / nBlocksSize) * nBlocksSize : nInLen * 3 + 1 >> 2;
-  var taBytes = new Uint8Array(nOutLen);
-
-  for (var nMod3, nMod4, nUint24 = 0, nOutIdx = 0, nInIdx = 0; nInIdx < nInLen; nInIdx++) {
-    nMod4 = nInIdx & 3;
-    nUint24 |= b64ToUint6(sB64Enc.charCodeAt(nInIdx)) << 18 - 6 * nMod4;
-    if (nMod4 === 3 || nInLen - nInIdx === 1) {
-      for (nMod3 = 0; nMod3 < 3 && nOutIdx < nOutLen; nMod3++, nOutIdx++) {
-        taBytes[nOutIdx] = nUint24 >>> (16 >>> nMod3 & 24) & 255;
-      }
-      nUint24 = 0;
-    }
-  }
-  return taBytes;
-}
-
-module.exports = { decode: decode };
-}); // $root/node_modules/audio-loader/lib/base64.js ends
-__sb_pundle_register('$root/node_modules/audio-loader/lib/fetch.js', function(module, exports){
-/* global XMLHttpRequest */
-'use strict';
-
-/**
- * Given a url and a return type, returns a promise to the content of the url
- * Basically it wraps a XMLHttpRequest into a Promise
- *
- * @param {String} url
- * @param {String} type - can be 'text' or 'arraybuffer'
- * @return {Promise}
- */
-
-var __dirname = '$root/node_modules/audio-loader/lib',
-    __filename = '$root/node_modules/audio-loader/lib/fetch.js',
-    __require = __sb_pundle_require('$root/node_modules/audio-loader/lib/fetch.js');
-
-module.exports = function (url, type) {
-  return new Promise(function (done, reject) {
-    var req = new XMLHttpRequest();
-    if (type) req.responseType = type;
-
-    req.open('GET', url);
-    req.onload = function () {
-      req.status === 200 ? done(req.response) : reject(Error(req.statusText));
-    };
-    req.onerror = function () {
-      reject(Error('Network Error'));
-    };
-    req.send();
-  });
-};
-}); // $root/node_modules/audio-loader/lib/fetch.js ends
 __sb_pundle_register('$root/node_modules/sample-player/lib/index.js', function(module, exports){
 'use strict';
 
@@ -26364,6 +26181,229 @@ var __dirname = '$root/node_modules/midimessage/dist',
 });
 //# sourceMappingURL=dist/index.js.map
 }); // $root/node_modules/midimessage/dist/index.min.js ends
+__sb_pundle_register('$root/node_modules/audio-loader/lib/index.js', function(module, exports){
+'use strict';
+
+var __dirname = '$root/node_modules/audio-loader/lib',
+    __filename = '$root/node_modules/audio-loader/lib/index.js',
+    __require = __sb_pundle_require('$root/node_modules/audio-loader/lib/index.js');
+
+var base64 = __require('$root/node_modules/audio-loader/lib/base64.js');
+var fetch = __require('$root/node_modules/audio-loader/lib/fetch.js');
+
+// Given a regex, return a function that test if against a string
+function fromRegex(r) {
+  return function (o) {
+    return typeof o === 'string' && r.test(o);
+  };
+}
+// Try to apply a prefix to a name
+function prefix(pre, name) {
+  return typeof pre === 'string' ? pre + name : typeof pre === 'function' ? pre(name) : name;
+}
+
+/**
+ * Load one or more audio files
+ *
+ *
+ * Possible option keys:
+ *
+ * - __from__ {Function|String}: a function or string to convert from file names to urls.
+ * If is a string it will be prefixed to the name:
+ * `load(ac, 'snare.mp3', { from: 'http://audio.net/samples/' })`
+ * If it's a function it receives the file name and should return the url as string.
+ * - __only__ {Array} - when loading objects, if provided, only the given keys
+ * will be included in the decoded object:
+ * `load(ac, 'piano.json', { only: ['C2', 'D2'] })`
+ *
+ * @param {AudioContext} ac - the audio context
+ * @param {Object} source - the object to be loaded
+ * @param {Object} options - (Optional) the load options for that object
+ * @param {Object} defaultValue - (Optional) the default value to return as
+ * in a promise if not valid loader found
+ */
+function load(ac, source, options, defVal) {
+  var loader =
+  // Basic audio loading
+  isArrayBuffer(source) ? loadArrayBuffer : isAudioFileName(source) ? loadAudioFile : isPromise(source) ? loadPromise
+  // Compound objects
+  : isArray(source) ? loadArrayData : isObject(source) ? loadObjectData : isJsonFileName(source) ? loadJsonFile
+  // Base64 encoded audio
+  : isBase64Audio(source) ? loadBase64Audio : isJsFileName(source) ? loadMidiJSFile : null;
+
+  var opts = options || {};
+  return loader ? loader(ac, source, opts) : defVal ? Promise.resolve(defVal) : Promise.reject('Source not valid (' + source + ')');
+}
+load.fetch = fetch;
+
+// BASIC AUDIO LOADING
+// ===================
+
+// Load (decode) an array buffer
+function isArrayBuffer(o) {
+  return o instanceof ArrayBuffer;
+}
+function loadArrayBuffer(ac, array, options) {
+  return new Promise(function (done, reject) {
+    ac.decodeAudioData(array, function (buffer) {
+      done(buffer);
+    }, function () {
+      reject("Can't decode audio data (" + array.slice(0, 30) + '...)');
+    });
+  });
+}
+
+// Load an audio filename
+var isAudioFileName = fromRegex(/\.(mp3|wav|ogg)(\?.*)?$/i);
+function loadAudioFile(ac, name, options) {
+  var url = prefix(options.from, name);
+  return load(ac, load.fetch(url, 'arraybuffer'), options);
+}
+
+// Load the result of a promise
+function isPromise(o) {
+  return o && typeof o.then === 'function';
+}
+function loadPromise(ac, promise, options) {
+  return promise.then(function (value) {
+    return load(ac, value, options);
+  });
+}
+
+// COMPOUND OBJECTS
+// ================
+
+// Try to load all the items of an array
+var isArray = Array.isArray;
+function loadArrayData(ac, array, options) {
+  return Promise.all(array.map(function (data) {
+    return load(ac, data, options, data);
+  }));
+}
+
+// Try to load all the values of a key/value object
+function isObject(o) {
+  return o && typeof o === 'object';
+}
+function loadObjectData(ac, obj, options) {
+  var dest = {};
+  var promises = Object.keys(obj).map(function (key) {
+    if (options.only && options.only.indexOf(key) === -1) return null;
+    var value = obj[key];
+    return load(ac, value, options, value).then(function (audio) {
+      dest[key] = audio;
+    });
+  });
+  return Promise.all(promises).then(function () {
+    return dest;
+  });
+}
+
+// Load the content of a JSON file
+var isJsonFileName = fromRegex(/\.json(\?.*)?$/i);
+function loadJsonFile(ac, name, options) {
+  var url = prefix(options.from, name);
+  return load(ac, load.fetch(url, 'text').then(JSON.parse), options);
+}
+
+// BASE64 ENCODED FORMATS
+// ======================
+
+// Load strings with Base64 encoded audio
+var isBase64Audio = fromRegex(/^data:audio/);
+function loadBase64Audio(ac, source, options) {
+  var i = source.indexOf(',');
+  return load(ac, base64.decode(source.slice(i + 1)).buffer, options);
+}
+
+// Load .js files with MidiJS soundfont prerendered audio
+var isJsFileName = fromRegex(/\.js(\?.*)?$/i);
+function loadMidiJSFile(ac, name, options) {
+  var url = prefix(options.from, name);
+  return load(ac, load.fetch(url, 'text').then(midiJsToJson), options);
+}
+
+// convert a MIDI.js javascript soundfont file to json
+function midiJsToJson(data) {
+  var begin = data.indexOf('MIDI.Soundfont.');
+  if (begin < 0) throw Error('Invalid MIDI.js Soundfont format');
+  begin = data.indexOf('=', begin) + 2;
+  var end = data.lastIndexOf(',');
+  return JSON.parse(data.slice(begin, end) + '}');
+}
+
+if (typeof module === 'object' && module.exports) module.exports = load;
+if (typeof window !== 'undefined') window.loadAudio = load;
+}); // $root/node_modules/audio-loader/lib/index.js ends
+__sb_pundle_register('$root/node_modules/audio-loader/lib/base64.js', function(module, exports){
+'use strict';
+
+// DECODE UTILITIES
+
+var __dirname = '$root/node_modules/audio-loader/lib',
+    __filename = '$root/node_modules/audio-loader/lib/base64.js',
+    __require = __sb_pundle_require('$root/node_modules/audio-loader/lib/base64.js');
+
+function b64ToUint6(nChr) {
+  return nChr > 64 && nChr < 91 ? nChr - 65 : nChr > 96 && nChr < 123 ? nChr - 71 : nChr > 47 && nChr < 58 ? nChr + 4 : nChr === 43 ? 62 : nChr === 47 ? 63 : 0;
+}
+
+// Decode Base64 to Uint8Array
+// ---------------------------
+function decode(sBase64, nBlocksSize) {
+  var sB64Enc = sBase64.replace(/[^A-Za-z0-9\+\/]/g, '');
+  var nInLen = sB64Enc.length;
+  var nOutLen = nBlocksSize ? Math.ceil((nInLen * 3 + 1 >> 2) / nBlocksSize) * nBlocksSize : nInLen * 3 + 1 >> 2;
+  var taBytes = new Uint8Array(nOutLen);
+
+  for (var nMod3, nMod4, nUint24 = 0, nOutIdx = 0, nInIdx = 0; nInIdx < nInLen; nInIdx++) {
+    nMod4 = nInIdx & 3;
+    nUint24 |= b64ToUint6(sB64Enc.charCodeAt(nInIdx)) << 18 - 6 * nMod4;
+    if (nMod4 === 3 || nInLen - nInIdx === 1) {
+      for (nMod3 = 0; nMod3 < 3 && nOutIdx < nOutLen; nMod3++, nOutIdx++) {
+        taBytes[nOutIdx] = nUint24 >>> (16 >>> nMod3 & 24) & 255;
+      }
+      nUint24 = 0;
+    }
+  }
+  return taBytes;
+}
+
+module.exports = { decode: decode };
+}); // $root/node_modules/audio-loader/lib/base64.js ends
+__sb_pundle_register('$root/node_modules/audio-loader/lib/fetch.js', function(module, exports){
+/* global XMLHttpRequest */
+'use strict';
+
+/**
+ * Given a url and a return type, returns a promise to the content of the url
+ * Basically it wraps a XMLHttpRequest into a Promise
+ *
+ * @param {String} url
+ * @param {String} type - can be 'text' or 'arraybuffer'
+ * @return {Promise}
+ */
+
+var __dirname = '$root/node_modules/audio-loader/lib',
+    __filename = '$root/node_modules/audio-loader/lib/fetch.js',
+    __require = __sb_pundle_require('$root/node_modules/audio-loader/lib/fetch.js');
+
+module.exports = function (url, type) {
+  return new Promise(function (done, reject) {
+    var req = new XMLHttpRequest();
+    if (type) req.responseType = type;
+
+    req.open('GET', url);
+    req.onload = function () {
+      req.status === 200 ? done(req.response) : reject(Error(req.statusText));
+    };
+    req.onerror = function () {
+      reject(Error('Network Error'));
+    };
+    req.send();
+  });
+};
+}); // $root/node_modules/audio-loader/lib/fetch.js ends
 __require('/usr/local/lib/node_modules/motion/node_modules/babel-regenerator-runtime/runtime.js');
 __require('$root');
 })();

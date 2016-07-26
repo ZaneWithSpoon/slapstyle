@@ -4,10 +4,12 @@ import Header from './header'
 import Toolbar from './toolbar'
 import Editor from './editor'
 import InstrumentPanel from './instrumentPanel'
+import Chatbox from './chatbox'
 import audio from './audio'
 
 //server ip
 var ip = 'http://localhost:8080'
+//var ip = 'http://54.211.58.93:8080'
 //socket
 var socket = io.connect(ip)
 
@@ -110,6 +112,7 @@ var Main = React.createClass({
           nextLoop={this.state.nextLoop}
           socket={socket}
           audio={audio} />
+        <Chatbox />
       </site>
     )
   },
@@ -201,13 +204,16 @@ var Main = React.createClass({
     var newMeasures = this.state.measures
     delete newMeasures[hmid]
 
-    var index = this.state.thisLoop.indexOf(hmid)
-    if (index > -1)
-      newThisLoop = this.state.thisLoop.splice(index, 1)
+    var newThisLoop = this.state.thisLoop.slice()
+    var newNextLoop = this.state.nextLoop.slice()
 
-    index = this.state.nextLoop.indexOf(hmid)
+    var index = newThisLoop.indexOf(hmid)
     if (index > -1)
-      newNextLoop = this.state.nextLoop.splice(index, 1)
+      newThisLoop.splice(index, 1)
+
+    index = newNextLoop.indexOf(hmid)
+    if (index > -1)
+      newNextLoop.splice(index, 1)
 
     if (hmid === this.state.focusId) {
       for (var id in this.state.measures) {

@@ -10,6 +10,11 @@ var Toolbar = React.createClass({
           <input style={textBpmStyle} id='textBpm' type='text' defaultValue={this.props.bpm} onKeyPress={this.updateBpm} onBlur={this.updateBpm}/>BPM
         </bpm>
       */}
+      {/*}
+        <chatroom style={{height:'100%'}}>
+          <img src='../assets/png/chat.png' alt='chat' style={chatStyle}/>
+        </chatroom>
+      */}
       </div>
     )
   },
@@ -52,7 +57,9 @@ var Toolbar = React.createClass({
   }
 })
 
-
+var chatStyle = {
+  height: '90%'
+}
 
 var toolbarStyle = {
   zIndex: 1,
@@ -60,7 +67,9 @@ var toolbarStyle = {
   width: '100%',
   height: '3em',
   backgroundColor: '#30353a',
-  boxShadow: '1px 1px 2px black'
+  boxShadow: '1px 1px 2px black',
+  display: 'flex',
+  justifyContent: 'space-between'
 }
 var playStyle = {
   float: 'left',

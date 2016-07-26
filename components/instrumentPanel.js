@@ -219,7 +219,7 @@ var channelStyle = {
   measure: {
     zIndex: '2',
     display: 'flex',
-    minHeight: '4em',
+    minHeight: '2em',
     justifyContent: 'space-between',
     flexDirection: 'row',
     width: '12em',
@@ -246,7 +246,7 @@ var channelStyle = {
     padding: '5px',
     width: '12em',
     overflow: 'hidden',
-    height: '2em',
+    height: '1.5em',
     transition: 'height .5s',
     transitionTimingFunction: 'ease-out'
   },
@@ -265,7 +265,7 @@ var channelStyle = {
     transitionTimingFunction: 'ease-out'
   },
   button: {
-    margin: '1em',
+    margin: '.5em',
     backgroundColor: 'transparent',
     cursor: 'pointer',
     color: 'white',
@@ -307,7 +307,7 @@ var channelStyle = {
 var panelStyle = {
   position: 'relative',
   width: '100%',
-  minHeight: '200px',
+  minHeight: '100px',
   display: 'flex',
   flexDirection: 'row',
   paddingTop: '1em',

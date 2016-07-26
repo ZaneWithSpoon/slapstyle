@@ -114,8 +114,10 @@ var Overlay = React.createClass({
     }
   },
   findUser: function(profile) {
+    var address = this.props.ip + "/user"
+    console.log(address)
     $.ajax({
-      url: this.props.ip + "/user",
+      url: address,
       type: "get", //send it through get method
       data: {'email': profile.email},
       success: function(response) {
@@ -127,7 +129,7 @@ var Overlay = React.createClass({
         }
       }.bind(this),
       error: function(xhr) {
-        console.log('broke')
+        console.log('couldn\'t sign in proprely')
         console.log(xhr)
       }
     })
