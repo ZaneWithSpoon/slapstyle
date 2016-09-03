@@ -4,66 +4,38 @@ import validator from 'validator'
 
 var Overlay = React.createClass({
   render: function() {
-    if (this.props.visible && !this.state.newUser) {
+    if (this.props.visible) {
       return (
-        <div id='overlay' style={overlayStyle} onClick={this.props.toggleOverlay}>
-          <div id='signIn' style={popUp} onClick={(e) => e.stopPropagation()}>
-            <h2>Sign in to start making beautiful music with friends!</h2>
-            <div id='signInButtons'>
-              <GoogleLogin
-                clientId='71814263033-7qt6smjgj0pt8itgtmtcaffns0csqdg9.apps.googleusercontent.com'
-                callback={this.responseGoogle}
-                cssClass='googleStyle' />
+        <background>
+          <div style={overlayStyle}>
+            <box style={popUp}>
+                <p style={{fontSize: 71, margin: 10}}>SlapStyle</p>
+                <p style={{fontSize: 29, margin: 10, marginBottom: 50}}>Music is better made together</p>
+                <fbButton style={fbButton}>
+                  <img src='../assets/png/fb-blue-50.png' alt='sample' style={{height:42, width:42, marginLeft: 5, marginRight: 5, float: 'left', position: 'relative'}}/>
+                  <span style={{position:'relative', marginTop: 18, marginLeft: 5, float: 'left'}}>Sign in with Facebook</span>
+                  <FacebookLogin
+                    appId={this.props.fbAppId}
+                    scope="public_profile,email,user_friends"
+                    autoLoad={true}
+                    callback={this.responseFacebook} 
+                    cssClass="fbStyle" 
+                    size='metro' />
+                </fbButton>
 
-              <FacebookLogin
-                appId="1612283222395868"
-                autoLoad={true}
-                fields="name,email,picture"
-                callback={this.responseFacebook} 
-                cssClass="fbStyle" 
-                size='metro' />
-            </div>
-            {/* created css classes in index.html */}
-            <p onClick={this.props.toggleOverlay}>
-              No thanks, I hate music
-            </p>
-          </div>
-        </div>
-      )
-    } else if (this.props.visible && this.state.newUser) {
-      return (
-        <div id='overlay' style={overlayStyle} onClick={this.props.toggleOverlay}>
-          <div id='signIn' style={popUp} onClick={(e) => e.stopPropagation()}>
-            <h2>Pick a username</h2>
-            <div style={middleStyle} >
-              <img src={this.state.userInfo.picture} alt='prof' style={picStyle} />
-              <div style={formStyle}>
-                <input id='username' type='text' 
-                  onKeyUp={this.findAvailability} 
-                  onKeyPress={(e) => function (e) { if (e.key === 'Enter') {this.signUp} }}
-                  autofocus={true} 
-                  placeholder='username' 
-                  style={inputStyle} />
-                <input id='firstName' type='text' defaultValue={this.state.userInfo.firstName} style={inputStyle} />
-                <input id='lastName' type='text' defaultValue={this.state.userInfo.lastName} style={inputStyle} />
-                <input id='email' type='text' defaultValue={this.state.userInfo.email} style={inputStyle} />              
-              </div>
-              <div id='usernameChecker' style={uCheckerStyle} >
-                {this.reportAvailability()}
-              </div>
-            </div>
+                <bufferDiv style={{height:50}} />
 
-            <div style={submitStyle} onClick={this.signUp}>
-              <p 
-                style={{
-                  verticalAlign: 'middle', 
-                  display: 'inline-block'}} >Sign Up</p>
-            </div>
-            <p onClick={this.props.toggleOverlay} style={{marginTop: '10px'}}>
-              Sorry. I&#39;m scared of commitment.
-            </p>
+                <gButton style={gButton}>
+                  <img src='../assets/png/g-logo.png' alt='sample' style={{height:42, width:42, marginLeft: 10, marginRight: 0, marginTop: 4, float: 'left', position: 'relative'}}/>
+                  <span style={{position:'relative', marginTop: 18, marginLeft: 5, float: 'left', color: 'black'}}>Sign in with Google</span>
+                  <GoogleLogin
+                    clientId='71814263033-7qt6smjgj0pt8itgtmtcaffns0csqdg9.apps.googleusercontent.com'
+                    callback={this.responseGoogle}
+                    cssClass='googleStyle' />
+                </gButton>
+            </box>
           </div>
-        </div>
+        </background>
       )
     } else {
       return null
@@ -71,31 +43,23 @@ var Overlay = React.createClass({
   },
   getInitialState: function() {
     return {
-      validUsername: false,
       newUser: false,
-      userInfo: {},
-      username: ''
-    }
-  },
-  reportAvailability: function() {
-    if (this.state.validUsername) {
-      return <span>{this.state.username} is available</span>
-    } else if (this.isValidUsername( this.state.username )) {
-      return <span>{this.state.username} is not available</span>
-    } else {
-      return <span>A valid username must be at least 3 characters and contain only letters and numbers</span>
+      userInfo: {}
     }
   },
   responseFacebook: function(response) { //TODO: sign in with google fucking cookies
     if(response.status !== 'unknown') {
-      var profile = {}
-      var names = response.name.split(' ')
-      profile.firstName = names[0]
-      profile.lastName = names[names.length-1]
-      profile.email = response.email
-      profile.picture = 'http://graph.facebook.com/' + response.id +'/picture?type=large'
+      console.log(response)
 
-      this.findUser(profile)
+
+      // var profile = {}
+      // var names = response.name.split(' ')
+      // profile.firstName = names[0]
+      // profile.lastName = names[names.length-1]
+      // profile.email = response.email
+      // profile.picture = 'http://graph.facebook.com/' + response.id +'/picture?type=large'
+
+      // this.findUser(profile)
     }
   },
   responseGoogle: function(response) {
@@ -158,7 +122,7 @@ var Overlay = React.createClass({
             this.setState({validUsername: false, username: username})
           }
         }.bind(this),
-        error: function(xhr) {
+        error: function(xhr) { 
           console.log('broke')
           console.log(xhr)
         }
@@ -253,40 +217,35 @@ var middleStyle = {
 var overlayStyle = {
   visibility: 'visible',
   position: 'absolute',
-  left: '0px',
-  top: '0px',
   width: '100%',
   height: '100%',
-  textAlign: 'center',
   zIndex: '1000',
-  backgroundColor: 'rgba(0,0,0,0.5)'
+  backgroundColor: '#23272A',
+  backgroundImage: 'url(../assets/dj.jpg)',
+  backgroundSize: 'cover',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center'
 }
 
-var hiddenOverlayStyle = {
-  visibility: 'visible',
-  position: 'absolute',
-  left: '0px',
-  top: '0px',
-  width: '100%',
-  height: '100%',
-  textAlign: 'center',
-  zIndex: '1000',
-  backgroundColor: 'rgba(0,0,0,0.3)'
+var fbButton = {
+  width: '225px',
+  height: '50px',
+  borderRadius: '10px',
+  backgroundColor: '#3B5998'
+}
+var gButton = {
+  width: '225px',
+  height: '50px',
+  borderRadius: '10px',
+  backgroundColor: 'white'
 }
 
 var popUp = {
-  width: '500px',
-  height: '300px',
-  backgroundColor: '#30353a',
-  padding: '15px',
-  margin: 'auto',
-  marginTop: '100px',
-  textAlign: 'center',
-  verticalAlign: 'middle',
-  borderRadius: '5px',
   display:'flex',
   flexDirection: 'column',
-  justifyContent: 'space-around'
+  justifyContent: 'space-between',
+  alignItems: 'center'
 }
 
 export default Overlay

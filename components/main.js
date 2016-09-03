@@ -6,10 +6,24 @@ import Editor from './editor'
 import InstrumentPanel from './instrumentPanel'
 import Chatbox from './chatbox'
 import audio from './audio'
+import {
+  Song,
+  Sequencer,
+  Sampler
+} from 'react-music'
+
+
+var dev = true
+if (dev) {
+  var fbAppId='1645822355708621'
+  var ip = 'http://localhost:8080'
+} else {
+  var fbAppId='1612283222395868'
+  var ip = 'http://54.211.58.93:8080'
+}
 
 //server ip
-var ip = 'http://localhost:8080'
-//var ip = 'http://54.211.58.93:8080'
+//
 //socket
 var socket = io.connect(ip)
 
@@ -66,8 +80,10 @@ var Main = React.createClass({
   render: function() {
     return (
       <site style={containerStyle}>
+      <div class="g-hangout" data-render="createhangout"></div>
         <Overlay 
           ip={ip}
+          fbAppId={fbAppId}
           visible={this.state.isModal} 
           toggleOverlay={this.toggleOverlay} 
           signIn={this.signIn} />
@@ -112,12 +128,47 @@ var Main = React.createClass({
           nextLoop={this.state.nextLoop}
           socket={socket}
           audio={audio} />
-        <Chatbox />
+        {/*
+        <test onClick={this.playSomething}>
+          test
+        </test>
+        <some onClick={this.changeSteps}>
+          some
+        </some>
+        <Song 
+          playing={this.state.playing}
+          tempo={this.state.bpm}>
+          <Sequencer resolution={16} bars={1}>
+            <Sampler
+              sample='./assets/sounds/hat.wav'
+              steps={this.state.steps}
+              detune={0} />
+          </Sequencer>
+        </Song>
+        <Song 
+          playing={this.state.otherPlaying}
+          tempo={this.state.bpm}>
+          <Sequencer resolution={16} bars={1}>
+            <Sampler
+              sample='./assets/sounds/hat.wav'
+              steps={this.state.steps}
+              detune={700} />
+          </Sequencer>
+        </Song>
+      */}
       </site>
     )
   },
+  playSomething: function() {
+    this.setState({playing: true})
+  },
+  changeSteps: function() {
+    this.setState({otherPlaying: true})
+  },
   getInitialState: function() {
     return {
+      otherPlaying: false,
+      steps: [0],
       user: {
         username: 'fakeName',
         id: 'user-cd955ef7-3e72-4eac-96f9-c4affd9f8b7a',
@@ -146,6 +197,9 @@ var Main = React.createClass({
   componentDidMount: function() {
     audio.startup()
     this.loadInstrument('vibraphone')
+    if (!this.state.isLoggedIn) {
+      this.setState({isModal: true})
+    }
   },
   socketListeners: function() {
     var that = this
