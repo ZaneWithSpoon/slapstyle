@@ -15,14 +15,14 @@ var Header = React.createClass({
           </div>
           <div id='searchbar' style={searchbarStyle}>
             <img src='./assets/png/search.png' alt='search' style={searchbarStyle.glass}/>
-            <input id='invited' type='text' onKeyPress={this.addUser} placeholder='Invite friends by username' style={searchbarStyle.input} />
+            <input id='invited' type='text' onKeyPress={this.addUser} placeholder='Invite friends by email' style={searchbarStyle.input} />
           </div>
           <div id='songList' style={songListStyle} onClick={this.showSongs}>
             <span style={songListStyle.name}>{this.props.songId} &#9662; </span>
           </div>
           {roommates}
           <div id='user' style={userStyle}>
-            <p style={userStyle.name}>{this.props.user.username}</p>
+            <p style={userStyle.name}>{this.props.user.firstname}</p>
             <img src={this.props.user.photo} alt='prof' style={userStyle.pic} />
           </div>
           <SongDropdown 

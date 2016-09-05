@@ -23,7 +23,7 @@ var SongDropdown = React.createClass({
       }}>
         <span style={songStyle.title}>{song.name} <br /></span>
         <span style={songStyle.owner}>{song.songid} <br /></span>
-        <span style={songStyle.owner}>{song.username}</span>
+        <span style={songStyle.owner}>{song.firstname} {song.lastname}</span>
       </div>
     )
   },

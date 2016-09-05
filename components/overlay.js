@@ -11,15 +11,17 @@ var Overlay = React.createClass({
             <box style={popUp}>
                 <p style={{fontSize: 71, margin: 10}}>SlapStyle</p>
                 <p style={{fontSize: 29, margin: 10, marginBottom: 50}}>Music is better made together</p>
+                {/* Ugly npm buttons invisible on top of pretty ones */}
                 <fbButton style={fbButton}>
                   <img src='../assets/png/fb-blue-50.png' alt='sample' style={{height:42, width:42, marginLeft: 5, marginRight: 5, float: 'left', position: 'relative'}}/>
                   <span style={{position:'relative', marginTop: 18, marginLeft: 5, float: 'left'}}>Sign in with Facebook</span>
                   <FacebookLogin
                     appId={this.props.fbAppId}
                     scope="public_profile,email,user_friends"
-                    autoLoad={true}
-                    callback={this.responseFacebook} 
-                    cssClass="fbStyle" 
+                    fields="name,email,picture,friends"
+                    autoLoad={false}
+                    callback={this.facebook} 
+                    cssClass="fbStyle"
                     size='metro' />
                 </fbButton>
 
@@ -30,8 +32,9 @@ var Overlay = React.createClass({
                   <span style={{position:'relative', marginTop: 18, marginLeft: 5, float: 'left', color: 'black'}}>Sign in with Google</span>
                   <GoogleLogin
                     clientId='71814263033-7qt6smjgj0pt8itgtmtcaffns0csqdg9.apps.googleusercontent.com'
-                    callback={this.responseGoogle}
-                    cssClass='googleStyle' />
+                    onSuccess={this.responseGoogle}
+                    onFailure={this.responseGoogle}
+                    className='googleStyle' />
                 </gButton>
             </box>
           </div>
@@ -43,133 +46,89 @@ var Overlay = React.createClass({
   },
   getInitialState: function() {
     return {
-      newUser: false,
       userInfo: {}
     }
   },
-  responseFacebook: function(response) { //TODO: sign in with google fucking cookies
-    if(response.status !== 'unknown') {
-      console.log(response)
-
-
-      // var profile = {}
-      // var names = response.name.split(' ')
-      // profile.firstName = names[0]
-      // profile.lastName = names[names.length-1]
-      // profile.email = response.email
-      // profile.picture = 'http://graph.facebook.com/' + response.id +'/picture?type=large'
-
-      // this.findUser(profile)
-    }
-  },
-  responseGoogle: function(response) {
-    if(response.status !== 'unknown') {
-      var profile = {}
-      profile.email = response.wc.hg
-      profile.firstName = response.wc.Za
-      profile.lastName = response.wc.Na
-      profile.picture = response.wc.Ph
-
-      if (profile.picture === undefined){
-        profile.picture = './assets/png/dolphin.png'
-      }
-
-      this.findUser(profile)
-    }
-  },
-  findUser: function(profile) {
-    var address = this.props.ip + "/user"
-    console.log(address)
-    $.ajax({
-      url: address,
-      type: "get", //send it through get method
-      data: {'email': profile.email},
-      success: function(response) {
-        if(response.profile === null){
-          this.setState({newUser: true, userInfo: profile})
-        } else {
-          this.props.signIn(response)
-          this.setState({newUser: false})
-        }
-      }.bind(this),
-      error: function(xhr) {
-        console.log('couldn\'t sign in proprely')
-        console.log(xhr)
-      }
-    })
-  },
-  isValidUsername: function(param) {
-    console.log(param)
-    console.log(/^\w+$/.test(param))
-    if (param === undefined || param.length <= 2){
-      return false
-    } else {
-      return /^\w+$/.test(param)
-    }
-  },
-  findAvailability: function() {
-    var username = document.getElementById('username').value.toLowerCase()
-
-    if (this.isValidUsername(username)) {
+  facebook: function(profile) {
+    if (profile.status !== 'unknown') {
       $.ajax({
-        url: this.props.ip + "/username",
+        url: this.props.ip + '/user',
         type: "get", //send it through get method
-        data: {'username': username},
+        data: {'email': profile.email},
         success: function(response) {
-          if(response.available){
-            this.setState({validUsername: true, username: username})
-          } else {
-            this.setState({validUsername: false, username: username})
+          if(response.profile === null){ //new user
+            var user = {}
+            var names = profile.name.split(' ')
+            user.firstname = names[0]
+            user.lastname = names[names.length-1]
+            user.email = profile.email
+            user.photo = 'http://graph.facebook.com/' + profile.id +'/picture?type=large'
+            user.fbid = profile.userID
+
+            $.ajax({
+              url: this.props.ip + "/addUser",
+              type: "post",
+              data: {user: user},
+              success: function(response) {                
+                this.props.signIn(response, profile.friends.data)
+              }.bind(this),
+              error: function(xhr) {
+                console.log('broke')
+                console.log(xhr)
+              }
+            })
+            
+          } else { //returning user
+            console.log('user exisis')
+            this.props.signIn(response, profile.friends.data)
           }
         }.bind(this),
-        error: function(xhr) { 
-          console.log('broke')
+        error: function(xhr) {
+          console.log('couldn\'t sign in proprely')
           console.log(xhr)
         }
       })
-    } else {
-      this.setState({validUsername: false, username: username})
     }
   },
-  signUp: function() {
-    var userInfo = {}
-    userInfo.username = document.getElementById('username').value.toLowerCase()
-    userInfo.firstName = document.getElementById('firstName').value.toLowerCase()
-    userInfo.lastName = document.getElementById('lastName').value.toLowerCase()
-    userInfo.email = document.getElementById('email').value.toLowerCase()
-    userInfo.photo = this.state.userInfo.picture
-
-    var err = ''
-
-    //check all fields to for emptyness/validity
-    for (var key in userInfo){
-      if (userInfo[key] === ''){
-        err = 'Don\'t be shy! Fill out all the information'
-      } 
-    }
-    if (!validator.isEmail(userInfo.email)) {
-      err = 'Looks like that email\s no good. Try another?'
-    } 
-    if (!this.isValidUsername(userInfo.username)) {
-      err = 'Please enter a valid username'
-    }
-
-    if (err === '') {
+  responseGoogle: function(profile) {
+    if (profile.status !== 'unknown') {
+      var profile = profile.profileObj
+      var email = profile.email
       $.ajax({
-        url: this.props.ip + "/addUser",
-        type: "post",
-        data: {user: userInfo},
+        url: this.props.ip + '/user',
+        type: "get", //send it through get method
+        data: {'email': email},
         success: function(response) {
-          this.props.signIn(response)
-          this.setState({newUser: false})
+          if(response.profile === null){ //new user
+            var user = {}
+            user.firstname = profile.givenName
+            user.lastname = profile.familyName
+            user.email = profile.email
+            user.photo = profile.imageUrl
+            user.fbid = null
+
+            $.ajax({
+              url: this.props.ip + "/addUser",
+              type: "post",
+              data: {user: user},
+              success: function(response) {                
+                this.props.signIn(response, null) 
+              }.bind(this),
+              error: function(xhr) {
+                console.log('broke')
+                console.log(xhr)
+              }
+            })
+            
+          } else { //returning user
+            this.props.signIn(response, null)
+          }
         }.bind(this),
         error: function(xhr) {
-          console.log('broke')
+          console.log('couldn\'t sign in proprely')
           console.log(xhr)
         }
       })
-    } else {
-      alert(err)
     }
   }
 })

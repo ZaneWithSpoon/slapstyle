@@ -172,7 +172,8 @@ var Main = React.createClass({
       user: {
         username: 'fakeName',
         id: 'user-cd955ef7-3e72-4eac-96f9-c4affd9f8b7a',
-        photo: './assets/png/dolphin.png'
+        photo: './assets/png/dolphin.png',
+        friends: []
       },
       isLoggedIn: false,
       isModal: false,
@@ -457,7 +458,8 @@ var Main = React.createClass({
       this.setState({songId: songid})
     }
   },
-  signIn: function(data) {
+  signIn: function(data, friends) {
+    data.user.friends = friends
     this.setState({
       user: data.user,
       isLoggedIn: true,
