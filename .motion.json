@@ -1,0 +1,15 @@
+{
+  "babel": {
+    "plugins": [
+      "motion-style/transform"
+    ],
+    "presets": [
+      "babel-preset-motion"
+    ]
+  },
+  "webServerPort": 8204,
+  "saveNpmModules": true,
+  "bundleDirectory": ".",
+  "publicDirectory": "./public",
+  "includePolyfills": true
+}

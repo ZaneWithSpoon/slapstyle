@@ -460,6 +460,7 @@ var Main = React.createClass({
   },
   signIn: function(data, friends) {
     data.user.friends = friends
+    data.user.name = data.user.firstname + ' ' + data.user.lastname
     this.setState({
       user: data.user,
       isLoggedIn: true,
