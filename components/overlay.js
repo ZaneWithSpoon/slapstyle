@@ -54,7 +54,11 @@ var Overlay = React.createClass({
       $.ajax({
         url: this.props.ip + '/user',
         type: "get", //send it through get method
-        data: {'email': profile.email},
+        data: {
+          'email': profile.email, 
+          'accessToken': profile.accessToken, 
+          'fbid': profile.userID
+        },
         success: function(response) {
           if(response.profile === null){ //new user
             var user = {}
@@ -64,6 +68,7 @@ var Overlay = React.createClass({
             user.email = profile.email
             user.photo = 'http://graph.facebook.com/' + profile.id +'/picture?type=large'
             user.fbid = profile.userID
+            user.accessToken = profile.accessToken
 
             $.ajax({
               url: this.props.ip + "/addUser",
@@ -78,7 +83,7 @@ var Overlay = React.createClass({
               }
             })
             
-          } else { //returning user
+          } else { //returning user (no cookie)
             console.log('user exisis')
             this.props.signIn(response, profile.friends.data)
           }
@@ -91,6 +96,7 @@ var Overlay = React.createClass({
     }
   },
   responseGoogle: function(profile) {
+    console.log(profile)
     if (profile.status !== 'unknown') {
       var profile = profile.profileObj
       var email = profile.email
@@ -106,6 +112,7 @@ var Overlay = React.createClass({
             user.email = profile.email
             user.photo = profile.imageUrl
             user.fbid = null
+            user.accessToken = null
 
             $.ajax({
               url: this.props.ip + "/addUser",

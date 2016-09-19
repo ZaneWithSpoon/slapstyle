@@ -11,6 +11,7 @@ import {
   Sequencer,
   Sampler
 } from 'react-music'
+import cookie from 'react-cookie'
 
 
 var dev = true
@@ -96,7 +97,8 @@ var Main = React.createClass({
           socket={socket}
           changeSongs={this.changeSongs}
           roommates={this.state.roommates}
-          userColors={userColors} />
+          userColors={userColors}
+          signout={this.signout} />
         <Toolbar 
           playing={this.state.playing} 
           play={this.play}
@@ -172,7 +174,7 @@ var Main = React.createClass({
       user: {
         username: 'fakeName',
         id: 'user-cd955ef7-3e72-4eac-96f9-c4affd9f8b7a',
-        photo: './assets/png/dolphin.png',
+        photo: './assets/png/businessman.png',
         friends: []
       },
       isLoggedIn: false,
@@ -196,17 +198,60 @@ var Main = React.createClass({
     }
   },
   componentDidMount: function() {
+    //load initial instruments
     audio.startup()
     this.loadInstrument('vibraphone')
+
     if (!this.state.isLoggedIn) {
-      this.setState({isModal: true})
+      //loads usr profile from cookies
+      var userid = cookie.load('userid')
+
+      if (userid) {
+        var longToken = cookie.load('longToken')
+
+          $.ajax({
+          url: ip + '/userid',
+          type: "get", //send it through get method
+          data: {'userid': userid},
+          success: function(profile) {
+            if (profile.profile !== 'unknown' && profile.profile !== null) { //returning user
+              if (profile.user.fbid !== null && profile.user.fbid !== '') { //has signed in with fb
+                $.ajax({
+                  url: 'https://graph.facebook.com/v2.7/' + profile.user.fbid + '/friends',
+                  type: 'get',
+                  data: {access_token: longToken},
+                  success: function(fbFriends) {
+                    this.signIn(profile, fbFriends.data)
+                  }.bind(this),
+                  error: function(xhr) {
+                    console.log('couldn\'t grab fb friends')
+                    console.log(xhr)
+                    this.signIn(profile, null)
+                  }.bind(this)
+                })
+              } else { //never signed in with fb
+                this.signIn(profile, null)
+              }   
+            } else { //new user
+              this.setState({isModal: true})
+            }
+          }.bind(this),
+          error: function(xhr) {
+            console.log('couldn\'t load profile from cookie')
+            console.log(xhr)
+            this.setState({isModal: true})
+          }
+        })
+      } else { //no cookies
+        this.setState({isModal: true})
+      }
     }
   },
   socketListeners: function() {
     var that = this
     //room listeners
     socket.on('user joined', function (data) {
-      console.log('received log in thing')
+      console.log('user has joined your room')
       that.userHasJoined(data.user)
       socket.emit('in room', {user: that.state.user, songid: that.state.songId, to: data.user.id})
     })
@@ -466,6 +511,9 @@ var Main = React.createClass({
       isLoggedIn: true,
       isModal: false
     })
+
+    this.giveCookie(data.user.id, data.user.fbtoken, data.user.expires)
+
     socket.emit('my room', {id: data.user.id})
     this.socketListeners()
     for(var i=0; i<data.songs.length; i++){
@@ -473,6 +521,24 @@ var Main = React.createClass({
         this.changeSongs(data.songs[i].songid)
       }
     }
+  },
+  giveCookie: function(userid, longToken, expires) {
+    var seconds = Math.floor(new Date() / 1000)
+    expires = parseInt(expires)
+    if (isNaN(expires)) {
+      cookie.save('userid', userid, { path: '/', maxAge: 5184000 })
+      cookie.save('longToken', longToken, { path: '/', maxAge: 5184000 })
+    } else {
+      cookie.save('userid', userid, { path: '/', maxAge: expires })
+      cookie.save('longToken', longToken, { path: '/', maxAge: expires })
+    }
+  },
+  signout: function() {
+    socket.emit('leave room', { old: this.state.songId, user: this.state.user })
+    this.setState({isLoggedIn: false, isModal: true})
+
+    cookie.remove('userid', { path: '/' })
+    cookie.remove('longToken', { path: '/' })
   }
 })
 

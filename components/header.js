@@ -1,52 +1,47 @@
 import SongDropdown from './songDropdown'
+import UserDropdown from './userDropdown'
 
 var Header = React.createClass({
   render: function() {
-    if (this.props.isLoggedIn) {
-      var roommates = []
-      this.props.roommates.forEach(function (user) {
-        roommates.push(this.roommateIcon(user))
-      }.bind(this))
+    var roommates = []
+    this.props.roommates.forEach(function (user) {
+      roommates.push(this.roommateIcon(user))
+    }.bind(this))
 
-      return (
-        <header style={headerStyle}>
-          <div style={logo}>
-            <span>SlapStyle</span>
-          </div>
-          <div id='searchbar' style={searchbarStyle}>
-            <img src='./assets/png/search.png' alt='search' style={searchbarStyle.glass}/>
-            <input id='invited' type='text' onKeyPress={this.addUser} placeholder='Invite friends by email' style={searchbarStyle.input} />
-          </div>
-          <div id='songList' style={songListStyle} onClick={this.showSongs}>
-            <span style={songListStyle.name}>{this.props.songId} &#9662; </span>
-          </div>
-          {roommates}
-          <div id='user' style={userStyle}>
-            <p style={userStyle.name}>{this.props.user.firstname}</p>
-            <img src={this.props.user.photo} alt='prof' style={userStyle.pic} />
-          </div>
-          <SongDropdown 
-            active={this.state.dropdown} 
-            songList={this.state.songList}
-            changeSongs={this.props.changeSongs}
-            hideSongs={this.hideSongs}
-            newSong={this.newSong} />
-        </header>
-      )
-    } else {
-      return (
-        <header style={headerStyle}>
-          <p style={logo}>SlapStyle</p>
-          <div style={loginStyle} onClick={this.props.toggleOverlay}>
-            Sign In
-          </div>
-        </header>
-      )
-    }
+    return (
+      <header style={headerStyle}>
+        <div style={logo}>
+          <span>SlapStyle</span>
+        </div>
+        <div id='searchbar' style={searchbarStyle}>
+          <img src='./assets/png/search.png' alt='search' style={searchbarStyle.glass}/>
+          <input id='invited' type='text' onKeyPress={this.addUser} placeholder='Invite friends by email' style={searchbarStyle.input} />
+        </div>
+        <div id='songList' style={songListStyle} onClick={this.showSongs}>
+          <span style={songListStyle.name}>{this.props.songId} &#9662; </span>
+        </div>
+        {roommates}
+        <div id='user' style={userStyle} onClick={this.showUserConfig}>
+          <p style={userStyle.name}>{this.props.user.firstname}</p>
+          <img src={this.props.user.photo} alt='prof' style={userStyle.pic} />
+        </div>
+        <UserDropdown 
+          active={this.state.userConfig} 
+          hideUserConfig={this.hideUserConfig}
+          signout={this.props.signout} />
+        <SongDropdown 
+          active={this.state.dropdown} 
+          songList={this.state.songList}
+          changeSongs={this.props.changeSongs}
+          hideSongs={this.hideSongs}
+          newSong={this.newSong} />
+      </header>
+    )
   },
   getInitialState: function() {
     return {
       dropdown: false,
+      userConfig: false,
       songList: []
     }
   },
@@ -90,6 +85,12 @@ var Header = React.createClass({
   },
   hideSongs: function() {
     this.setState({dropdown: false})
+  },
+  showUserConfig: function() {
+    this.setState({userConfig: true})
+  },
+  hideUserConfig: function() {
+    this.setState({userConfig: false})
   },
   addUser: function(e) {
     if (e.key === 'Enter') {
@@ -164,6 +165,7 @@ var songListStyle = {
   }
 }
 var userStyle = {
+  cursor: 'pointer',
   float: 'right',
   height: '100%',
   name: {

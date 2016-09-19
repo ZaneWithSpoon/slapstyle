@@ -65,7 +65,8 @@ var toolbarStyle = {
   zIndex: 1,
   position: 'relative',
   width: '100%',
-  height: '3em',
+  minHeight: '3em',
+  maxHeight: '3em',
   backgroundColor: '#30353a',
   boxShadow: '1px 1px 2px black',
   display: 'flex',
@@ -73,7 +74,6 @@ var toolbarStyle = {
 }
 var playStyle = {
   float: 'left',
-  height: '100%', 
   width: '1.75em',
   fontSize: '1.75em',
   borderRight: '2px solid #23272A',
