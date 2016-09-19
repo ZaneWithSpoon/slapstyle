@@ -335,7 +335,7 @@ var Main = React.createClass({
     }
   },
   addChannel: function(channel) {
-    audio.loadInstrument(channel.sampletype)
+    this.loadInstrument(channel.sampletype)
     var newChannels = this.state.channels
     newChannels[channel.channelid] = channel
     this.setState({channels: newChannels})

@@ -75,7 +75,6 @@ var InstrumentPanel = React.createClass({
     }
   },
   drawMeasures: function (measure, id) {
-    //TODO: make checkboxes circles with repeat symbols
     //TODO: rename measures option next to delete
     return (
       <div key={id} style={this.props.focusId === id ? channelStyle.focusContainer : channelStyle.container}>
@@ -89,7 +88,7 @@ var InstrumentPanel = React.createClass({
           </div>
         </div>
         <div style={this.state.openOptions === id ? channelStyle.options : channelStyle.hiddenOptions}>
-          <button style={channelStyle.button} onClick={() => this.props.isLoggedIn ? this.removeMeasure(id) : this.props.toggleOverlay() }>delete</button>
+          <button style={channelStyle.button} onClick={() => (Object.keys(this.props.measures).length > 1) ? this.removeMeasure(id) : {} }>delete</button>
         </div>
       </div>
     )

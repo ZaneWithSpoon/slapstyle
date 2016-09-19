@@ -95,23 +95,24 @@ var Header = React.createClass({
   addUser: function(e) {
     if (e.key === 'Enter') {
       var input = document.getElementById('invited')
-      var username = input.value.toLowerCase()
+      var email = input.value.toLowerCase()
 
       $.ajax({
-        url: this.props.ip + "/username",
-        type: "get", //send it through get method
-        data: {'username': username},
+        url: this.props.ip + '/invite',
+        type: 'get',
+        data: {'email': email},
         success: function(response) {
-          if(response.available){
-            alert('no user exists by that username')
-          } else {
+          if(response.exists){
             this.props.socket.emit('invite to room', {
-              invited: username, 
-              origin: this.props.user.username,
+              userid: response.userid, 
+              origin: this.props.user.firstname,
               songid: this.props.songId
             })
-            alert(username + ' has been invited to this song')
+            alert(response.firstname + ' has been invited to this song')
             input.value = ''
+          } else {
+            input.value = ''
+            alert('no user exists with that email')
           }
         }.bind(this),
         error: function(xhr) {
