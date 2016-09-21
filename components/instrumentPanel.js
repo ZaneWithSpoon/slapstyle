@@ -35,7 +35,8 @@ var InstrumentPanel = React.createClass({
   getInitialState: function () {
     return {
       instrumentList: false,
-      openOptions: ''
+      openOptions: '',
+      showMeasureRenameBox: false
     }
   },
   drawChannels: function (channel, id) {
@@ -89,6 +90,8 @@ var InstrumentPanel = React.createClass({
         </div>
         <div style={this.state.openOptions === id ? channelStyle.options : channelStyle.hiddenOptions}>
           <button style={channelStyle.button} onClick={() => (Object.keys(this.props.measures).length > 1) ? this.removeMeasure(id) : {} }>delete</button>
+          <button style={channelStyle.button} onClick={() => this.renameMeasure(id) }>rename</button>
+          { this.state.showMeasureRenameBox ? <input type="text" style={channelStyle.input} value={measure.name} onChange={this.handleMeasureRename}></input> : null } 
         </div>
       </div>
     )
@@ -133,6 +136,18 @@ var InstrumentPanel = React.createClass({
       channelid: channelid
     }
     this.props.socket.emit('add measure', {measure: newMeasure, songid: this.props.songId})
+  },
+  renameMeasure: function (hmid) {
+    console.log(hmid)
+    if (this.state.showMeasureRenameBox) {
+      this.setState({ showMeasureRenameBox: false })
+      // make renameButton close 
+    } else {
+      this.setState({ showMeasureRenameBox: true })
+    }
+  },
+  handleMeasureRename: function () {
+    console.log('handling measure rename')
   },
   removeMeasure: function (hmid) {
     this.props.socket.emit('remove measure', {hmid: hmid, songid: this.props.songId})
@@ -266,6 +281,13 @@ var channelStyle = {
   button: {
     margin: '.5em',
     backgroundColor: 'transparent',
+    cursor: 'pointer',
+    color: 'white',
+    borderWidth: '0px'
+  },
+  input: {
+    flexDirection: 'column',
+    margin: '.5em',
     cursor: 'pointer',
     color: 'white',
     borderWidth: '0px'
