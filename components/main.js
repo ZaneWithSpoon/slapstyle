@@ -20,7 +20,7 @@ if (dev) {
   var ip = 'http://localhost:8080'
 } else {
   var fbAppId='1612283222395868'
-  var ip = 'http://54.211.58.93:8080'
+  var ip = 'http://54.211.198.253:8080'
 }
 
 //server ip
@@ -98,7 +98,8 @@ var Main = React.createClass({
           changeSongs={this.changeSongs}
           roommates={this.state.roommates}
           userColors={userColors}
-          signout={this.signout} />
+          signout={this.signout}
+          socket={socket} />
         <Toolbar 
           playing={this.state.playing} 
           play={this.play}

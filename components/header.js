@@ -1,5 +1,6 @@
 import SongDropdown from './songDropdown'
 import UserDropdown from './userDropdown'
+import SearchResults from './searchResults'
 
 var Header = React.createClass({
   render: function() {
@@ -13,10 +14,14 @@ var Header = React.createClass({
         <div style={logo}>
           <span>SlapStyle</span>
         </div>
-        <div id='searchbar' style={searchbarStyle}>
+        <div id='searchbar' style={searchbarStyle} onClick={this.showFriends} onBlur={this.hideFriends} >
           <img src='./assets/png/search.png' alt='search' style={searchbarStyle.glass}/>
-          <input id='invited' type='text' onKeyPress={this.addUser} placeholder='Invite friends by email' style={searchbarStyle.input} />
+          <input id='invited' type='text' onKeyPress={this.addUser} placeholder='Invite friends' style={searchbarStyle.input} />
         </div>
+        <SearchResults
+          active={this.state.showFriends}
+          friends={this.state.friendList}
+          onlineFriends={this.state.onlineFriends} />
         <div id='songList' style={songListStyle} onClick={this.showSongs}>
           <span style={songListStyle.name}>{this.props.songId} &#9662; </span>
         </div>
@@ -42,8 +47,17 @@ var Header = React.createClass({
     return {
       dropdown: false,
       userConfig: false,
-      songList: []
+      showFriends: false,
+      songList: [],
+      friendList: [],
+      onlineFriends: []
     }
+  },
+  componentDidMount: function() {
+    this.props.socket.on('friend online', function (data) {
+      var newOnlineFriends = this.state.onlineFriends
+      this.setState({newOnlineFriends.push(data.friend)})
+    })
   },
   roommateIcon: function(user) {
     return (
@@ -91,6 +105,34 @@ var Header = React.createClass({
   },
   hideUserConfig: function() {
     this.setState({userConfig: false})
+  },
+  showFriends: function() {
+    this.setState({onlineFriends: []})
+
+    var friends = []
+    this.props.user.friends.forEach(function(friend) {
+      friends.push(friend.id)
+    })
+
+    $.ajax({
+      url: this.props.ip + "/friends",
+      type: "get", //send it through get method
+      data: {
+        id: this.props.user.id,
+        friends: friends
+      },
+      success: function(response) {
+        console.log(response)
+        this.setState({showFriends: true, friendList: response})
+      }.bind(this),
+      error: function(xhr) {
+        console.log('broke')
+        console.log(xhr)
+      }
+    })
+  },
+  hideFriends: function() {
+    this.setState({showFriends: false})
   },
   addUser: function(e) {
     if (e.key === 'Enter') {

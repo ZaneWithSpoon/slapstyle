@@ -1,2 +1,2 @@
-# lightBeat
-Light Beat for making music online collaboratively
+# SlapStyle
+Make music together online!
