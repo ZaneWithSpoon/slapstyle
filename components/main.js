@@ -241,7 +241,7 @@ var Main = React.createClass({
             console.log('couldn\'t load profile from cookie')
             console.log(xhr)
             this.setState({isModal: true})
-          }
+          }.bind(this)
         })
       } else { //no cookies
         this.setState({isModal: true})

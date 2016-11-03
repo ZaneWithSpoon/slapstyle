@@ -14,14 +14,16 @@ var Header = React.createClass({
         <div style={logo}>
           <span>SlapStyle</span>
         </div>
-        <div id='searchbar' style={searchbarStyle} onClick={this.showFriends} onBlur={this.hideFriends} >
+        <div id='searchbar' style={searchbarStyle} onClick={this.showFriends} onBlur={this.hideFriends}>
           <img src='./assets/png/search.png' alt='search' style={searchbarStyle.glass}/>
           <input id='invited' type='text' onKeyPress={this.addUser} placeholder='Invite friends' style={searchbarStyle.input} />
         </div>
         <SearchResults
           active={this.state.showFriends}
           friends={this.state.friendList}
-          onlineFriends={this.state.onlineFriends} />
+          onlineFriends={this.state.onlineFriends}
+          addUserById={this.addUserById}
+          hideFriends={this.hideFriends} />
         <div id='songList' style={songListStyle} onClick={this.showSongs}>
           <span style={songListStyle.name}>{this.props.songId} &#9662; </span>
         </div>
@@ -54,10 +56,10 @@ var Header = React.createClass({
     }
   },
   componentDidMount: function() {
-    this.props.socket.on('friend online', function (data) {
-      var newOnlineFriends = this.state.onlineFriends
-      this.setState({newOnlineFriends.push(data.friend)})
-    })
+    // this.props.socket.on('friend online', function (data) {
+    //   var newOnlineFriends = this.state.onlineFriends
+    //   this.setState({newOnlineFriends.push(data.friend)})
+    // })
   },
   roommateIcon: function(user) {
     return (
@@ -132,7 +134,17 @@ var Header = React.createClass({
     })
   },
   hideFriends: function() {
-    this.setState({showFriends: false})
+    window.setTimeout(() => {
+      this.setState({showFriends: false})
+    }, 200)
+  },
+  addUserById: function(id) {
+    console.log(id + ' added')
+    this.props.socket.emit('invite to room', {
+      userid: id, 
+      origin: this.props.user.firstname,
+      songid: this.props.songId
+    })
   },
   addUser: function(e) {
     if (e.key === 'Enter') {
@@ -145,11 +157,7 @@ var Header = React.createClass({
         data: {'email': email},
         success: function(response) {
           if(response.exists){
-            this.props.socket.emit('invite to room', {
-              userid: response.userid, 
-              origin: this.props.user.firstname,
-              songid: this.props.songId
-            })
+            this.addUserById(response.id)
             alert(response.firstname + ' has been invited to this song')
             input.value = ''
           } else {
