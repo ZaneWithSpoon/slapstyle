@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="google-signin-client_id" content="71814263033-7qt6smjgj0pt8itgtmtcaffns0csqdg9.apps.googleusercontent.com">
+  <meta name="google-site-verification" content="fh_SL_1l4YBdXYR-tjLpiNuYn3BhXQMwnSmlJ7BKCSY" />
 
   <link rel="icon" type="image/png" href="favicon.png" />
 
@@ -23,8 +23,6 @@
   <script src="https://fb.me/react-dom-15.1.0.js"></script>
   <!-- Application Bundle -->
   <script src="_/bundle.js"></script>
-  <!-- Google Platform Library (for Sign-in) -->
-  <script src="https://apis.google.com/js/platform.js" async defer></script>
 
   <!-- google analytics -->
   <script>
@@ -43,7 +41,7 @@
       height: 100%;
     }
     body { 
-      font-family: 'Rasa', serif;
+      font-family: sans-serif;
       background-color:#23272A;
       color: white;
       margin: 0;
@@ -52,21 +50,81 @@
     .fbStyle {
       background-color: #3B5998;
       color: white;
-      margin: 1em;
-      width: 200px;
+      margin-left: -200px;
+      width: 225px;
       height: 50px;
       border-radius: 10px;
+      opacity: 0;
+      z-index: 99999;
+      cursor: pointer;
+      position: absolute;
     }
 
     .googleStyle {
-      background-color: white;
-      color: black;
-      margin: 1em;
-      width: 200px;
+      background-color: #3B5998;
+      color: white;
+      margin-left: -185px;
+      width: 225px;
       height: 50px;
       border-radius: 10px;
+      opacity: 0;
+      z-index: 99999;
+      cursor: pointer;
+      position: absolute;
     }
 
+    .spinner {
+      width: 50px;
+      height: 40px;
+      text-align: center;
+      font-size: 10px;
+    }
+
+    .spinner > div {
+      margin-left: 1px;
+      background-color: #ffffff;
+      height: 100%;
+      width: 5px;
+      display: inline-block;
+      
+      -webkit-animation: sk-stretchdelay 1.2s infinite ease-in-out;
+      animation: sk-stretchdelay 1.2s infinite ease-in-out;
+    }
+
+    .spinner .rect2 {
+      -webkit-animation-delay: -1.1s;
+      animation-delay: -1.1s;
+    }
+
+    .spinner .rect3 {
+      -webkit-animation-delay: -1.0s;
+      animation-delay: -1.0s;
+    }
+
+    .spinner .rect4 {
+      -webkit-animation-delay: -0.9s;
+      animation-delay: -0.9s;
+    }
+
+    .spinner .rect5 {
+      -webkit-animation-delay: -0.8s;
+      animation-delay: -0.8s;
+    }
+
+    @-webkit-keyframes sk-stretchdelay {
+      0%, 40%, 100% { -webkit-transform: scaleY(0.4) }  
+      20% { -webkit-transform: scaleY(1.0) }
+    }
+
+    @keyframes sk-stretchdelay {
+      0%, 40%, 100% { 
+        transform: scaleY(0.4);
+        -webkit-transform: scaleY(0.4);
+      }  20% { 
+        transform: scaleY(1.0);
+        -webkit-transform: scaleY(1.0);
+      }
+    }
   </style>
 
 </body>

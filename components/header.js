@@ -25,7 +25,7 @@ var Header = React.createClass({
           addUserById={this.addUserById}
           hideFriends={this.hideFriends} />
         <div id='songList' style={songListStyle} onClick={this.showSongs}>
-          <span style={songListStyle.name}>{this.props.songId} &#9662; </span>
+          <span style={songListStyle.name}>{this.props.songName} &#9662; </span>
         </div>
         {roommates}
         <div id='user' style={userStyle} onClick={this.showUserConfig}>
@@ -37,17 +37,18 @@ var Header = React.createClass({
           hideUserConfig={this.hideUserConfig}
           signout={this.props.signout} />
         <SongDropdown 
-          active={this.state.dropdown} 
+          active={this.state.songDropdown} 
           songList={this.state.songList}
           changeSongs={this.props.changeSongs}
           hideSongs={this.hideSongs}
-          newSong={this.newSong} />
+          newSong={this.newSong}
+          songId={this.props.songId} />
       </header>
     )
   },
   getInitialState: function() {
     return {
-      dropdown: false,
+      songDropdown: false,
       userConfig: false,
       showFriends: false,
       songList: [],
@@ -91,7 +92,7 @@ var Header = React.createClass({
       type: "get", //send it through get method
       data: {'userid': this.props.user.id},
       success: function(response) {
-        this.setState({dropdown: true, songList: response})
+        this.setState({songDropdown: true, songList: response})
       }.bind(this),
       error: function(xhr) {
         console.log('broke')
@@ -100,7 +101,7 @@ var Header = React.createClass({
     })
   },
   hideSongs: function() {
-    this.setState({dropdown: false})
+    this.setState({songDropdown: false})
   },
   showUserConfig: function() {
     this.setState({userConfig: true})
@@ -206,13 +207,18 @@ var songListStyle = {
   height: '100%',
   minWidth: '10em',
   maxWidth: '12em',
+  minHeight: '3em',
   color: 'white',
   textAlign: 'center',
   marginLeft: '5px',
   paddingLeft: '2px',
   cursor: 'pointer',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
   name: {
-    marginTop: '1.5em'
+    margiTop: '1.5em',
+    fontSize: '20px'
   }
 }
 var userStyle = {

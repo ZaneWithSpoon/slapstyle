@@ -94,6 +94,7 @@ var Main = React.createClass({
           isLoggedIn={this.state.isLoggedIn} 
           user={this.state.user} 
           songId={this.state.songId}
+          songName={this.state.songName}
           socket={socket}
           changeSongs={this.changeSongs}
           roommates={this.state.roommates}
@@ -184,6 +185,7 @@ var Main = React.createClass({
       playingBeat: -1,
       playing: false,
       songId: '',
+      songName: 'nameless',
       focusId: 'test',
       bpm: 110,
       division: division,
@@ -419,6 +421,7 @@ var Main = React.createClass({
       channels: channels, 
       measures: measures, 
       focusId: data.measures[0].hmid,
+      songName: data.song.name,
       thisLoop: loops.slice(),
       nextLoop: loops.slice()
     })
@@ -496,9 +499,9 @@ var Main = React.createClass({
   changeSongs: function(songid) {
     if (songid !== this.state.songId){
       this.setState({roommates: []})
-      if (this.state.songId === '') {
+      if (this.state.songId === '') { //first song loaded
         socket.emit('switch room', { new: songid, user: this.state.user })
-      } else {
+      } else { //changing songs
         socket.emit('switch room', { old: this.state.songId, new: songid, user: this.state.user })
       }
       this.setState({songId: songid})
@@ -521,7 +524,7 @@ var Main = React.createClass({
       if (data.songs[i].songid === data.user.primarySong) {
         this.changeSongs(data.songs[i].songid)
       }
-    }
+    } 
   },
   giveCookie: function(userid, longToken, expires) {
     var seconds = Math.floor(new Date() / 1000)
