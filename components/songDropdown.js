@@ -1,6 +1,5 @@
 var SongDropdown = React.createClass({
   render: function() {
-    console.log(this.props.songList)
     if (this.props.active) {
       var rows = []
       var currentSong = []
@@ -13,13 +12,19 @@ var SongDropdown = React.createClass({
       }.bind(this))
 
       return (
-        <div id='songDropdown' tabIndex='-1' style={dropdownStyle}> 
+        <div id='songDropdown' tabIndex='-1' style={dropdownStyle} onBlur={this.props.hideSongs}> 
           <div style={songStyle.label}>Edit Song</div>
           <songOptions style={songOptions}>   
-            <renameSong style={songOptions.button} onClick={() => console.log('Rename song')} >
+            <renameSong style={songOptions.button} onClick={() => {
+              this.props.hideSongs()
+              this.props.renameSong()
+            }} >
               Rename
             </renameSong>
-            <deleteSong style={songOptions.button} onClick={() => console.log('delete song')} >
+            <deleteSong style={songOptions.button} onClick={() => {
+              this.props.hideSongs()
+              this.props.deleteSong()
+            }} >
               Delete
             </deleteSong>
           </songOptions>
@@ -37,7 +42,7 @@ var SongDropdown = React.createClass({
   drawSongs: function(song) {
     return (
       <div key={song.songid} style={songStyle} onClick={() => {
-        //this.props.hideSongs()
+        this.props.hideSongs()
         this.props.changeSongs(song.songid)
       }}>
         <span style={songStyle.title}>{song.name} <br /></span>

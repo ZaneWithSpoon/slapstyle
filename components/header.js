@@ -24,9 +24,7 @@ var Header = React.createClass({
           onlineFriends={this.state.onlineFriends}
           addUserById={this.addUserById}
           hideFriends={this.hideFriends} />
-        <div id='songList' style={songListStyle} onClick={this.showSongs}>
-          <span style={songListStyle.name}>{this.props.songName} &#9662; </span>
-        </div>
+        <this.songTitle />
         {roommates}
         <div id='user' style={userStyle} onClick={this.showUserConfig}>
           <p style={userStyle.name}>{this.props.user.firstname}</p>
@@ -42,12 +40,35 @@ var Header = React.createClass({
           changeSongs={this.props.changeSongs}
           hideSongs={this.hideSongs}
           newSong={this.newSong}
-          songId={this.props.songId} />
+          songId={this.props.songId}
+          renameSong={this.renameSong}  
+          deleteSong={this.props.deleteSong} />
       </header>
     )
   },
+  songTitle: function() {
+    if (this.state.renaming === true) {
+      return (
+        <div id='songList' style={songListStyle}>
+          <input id='renameBox' type="text" 
+            style={songListStyle.rename} 
+            defaultValue={this.props.songName} 
+            onBlur={this.stopRenamingSong}
+            onKeyPress={this.saveName}>
+          </input>
+        </div>
+      )
+    } else {
+      return (
+        <div id='songList' style={songListStyle} onClick={this.showSongs}>
+          <span style={songListStyle.name}>{this.props.songName} &#9662; </span>
+        </div>
+      )
+    }
+  },
   getInitialState: function() {
     return {
+      renaming: false,
       songDropdown: false,
       userConfig: false,
       showFriends: false,
@@ -56,11 +77,11 @@ var Header = React.createClass({
       onlineFriends: []
     }
   },
-  componentDidMount: function() {
-    // this.props.socket.on('friend online', function (data) {
-    //   var newOnlineFriends = this.state.onlineFriends
-    //   this.setState({newOnlineFriends.push(data.friend)})
-    // })
+  componentDidUpdate: function() {
+    var renameBox = document.getElementById('renameBox')
+    if (renameBox)
+      renameBox.focus()
+
   },
   roommateIcon: function(user) {
     return (
@@ -85,6 +106,22 @@ var Header = React.createClass({
         console.log(xhr)
       }
     })
+  },
+  renameSong: function() {
+    this.setState({renaming: true})
+  },
+  stopRenamingSong: function() {
+    this.setState({renaming: false})    
+  },
+  saveName: function(e) {
+    if (e.key === 'Enter') {
+      var newName = document.getElementById('renameBox').value
+      this.stopRenamingSong()
+      this.props.socket.emit('rename song', {
+        songid: this.props.songId,
+        name: newName
+      })
+    }
   },
   showSongs: function() {
     $.ajax({
@@ -217,8 +254,14 @@ var songListStyle = {
   justifyContent: 'center',
   alignItems: 'center',
   name: {
-    margiTop: '1.5em',
-    fontSize: '20px'
+    fontSize: '18px'
+  },
+  rename: {
+    fontSize: '18px',
+    color: 'white',
+    backgroundColor: '#23272A',
+    borderWidth: 0,
+    maxWidth: '8em'
   }
 }
 var userStyle = {

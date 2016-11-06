@@ -284,6 +284,10 @@ var Main = React.createClass({
     socket.on('remove channel', function (data) {
       that.removeChannel(data)
     })
+    //song updates
+    socket.on('song renamed', function (newSongStuff) {
+      that.renameSong(newSongStuff)
+    })
     //misc listeners
     socket.on('invited', function (data) {
       alert(data + ' has invited you to work on a song. Find it in your song list.')
@@ -401,6 +405,11 @@ var Main = React.createClass({
     this.setState({bpm: newBpm})
     document.getElementById('sliderBpm').value = newBpm
     document.getElementById('textBpm').value = newBpm
+  },
+  renameSong: function (song) {
+    console.log(song)
+    if (song.id = this.state.songId) //sanity check to make sure the right song is changing
+      this.setState({songName: song.name})
   },
   loadSong: function (data) {
     var channels = {}
