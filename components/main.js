@@ -100,6 +100,7 @@ var Main = React.createClass({
           roommates={this.state.roommates}
           userColors={userColors}
           signout={this.signout}
+          deleteSong={this.deleteSong}
           socket={socket} />
         <Toolbar 
           playing={this.state.playing} 
@@ -288,6 +289,37 @@ var Main = React.createClass({
     socket.on('song renamed', function (newSongStuff) {
       that.renameSong(newSongStuff)
     })
+    socket.on('delete song confirmation', function (nothingImportant) {
+      var result = confirm('Are you sure you want to delete this song?')
+      console.log(result)
+      if (result) {
+        socket.emit('delete song confirmed', {
+          songid: that.state.songId,
+          userid: that.state.user.id
+        })
+      }
+    })
+    socket.on('delete song denied', function (message) {
+      alert(message.message)
+    })
+    socket.on('current song deleted', function(song) {
+      $.ajax({
+        url: ip + "/userPrimarySong",
+        type: "get", //send it through get method
+        data: {'userid': that.state.user.id},
+        success: function(response) {
+          that.changeSongs(response.songid)
+        }.bind(this),
+        error: function(xhr) {
+          console.log('user primary song broke')
+          console.log(xhr)
+        }
+      })
+
+
+
+      alert('Your current song was deleted')
+    })
     //misc listeners
     socket.on('invited', function (data) {
       alert(data + ' has invited you to work on a song. Find it in your song list.')
@@ -406,8 +438,13 @@ var Main = React.createClass({
     document.getElementById('sliderBpm').value = newBpm
     document.getElementById('textBpm').value = newBpm
   },
+  deleteSong: function () {
+    socket.emit('delete song attempt', {
+      songid: this.state.songId,
+      userid: this.state.user.id
+    })
+  },
   renameSong: function (song) {
-    console.log(song)
     if (song.id = this.state.songId) //sanity check to make sure the right song is changing
       this.setState({songName: song.name})
   },

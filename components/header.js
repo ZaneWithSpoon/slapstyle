@@ -92,13 +92,11 @@ var Header = React.createClass({
     )
   },
   newSong: function() {
-    console.log('newSong')
     $.ajax({
       url: this.props.ip + "/newSong",
       type: "post",
       data: {userid: this.props.user.id},
       success: function(response) {
-        console.log(response)
         this.props.changeSongs(response.songid)
       }.bind(this),
       error: function(xhr) {
