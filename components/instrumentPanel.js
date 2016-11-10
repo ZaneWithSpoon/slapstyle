@@ -1,4 +1,3 @@
-//TODO: make instrument panel always hit bottom of page
 var InstrumentPanel = React.createClass({
   render: function () {
     var channels = []
@@ -26,6 +25,7 @@ var InstrumentPanel = React.createClass({
                   </div>
                 )
               }.bind(this))}
+
             </div>
           </div>
         </div>
@@ -40,8 +40,8 @@ var InstrumentPanel = React.createClass({
     }
   },
   drawChannels: function (channel, id) {
-    //TODO: figure out ho to add channel options (hamburger menu?)
-    //TODO: make add measure 'paper' pull down on hover
+    console.log("channel id")
+    console.log(id)
     var measures = []
     for (var measure in this.props.measures) {
       if (this.props.measures[measure].channelid === id){
@@ -77,36 +77,26 @@ var InstrumentPanel = React.createClass({
   },
   drawMeasures: function (measure, id) {
     //TODO: rename measures option next to delete
+    console.log('measure id')
+    console.log(id)
     return (
       <div key={id} style={this.props.focusId === id ? channelStyle.focusContainer : channelStyle.container}>
+
         <div style={channelStyle.measure} onClick={() => this.props.updateFocus(id)}>
           <div style={channelStyle.left}>
             <span style={channelStyle.name}>{measure.name}</span>
           </div>
           <div style={channelStyle.right}>
-            <this.repeatSymbol id={id}/>
+            <img src={this.props.nextLoop.indexOf(id) > -1 ? '../assets/png/repeatBlue.png' : '../assets/png/repeatWhite.png'} alt='repeat' style={channelStyle.repeatBlue} onClick={(e) => {e.stopPropagation(); this.props.toggleNextLoop(id)}}/>
             <span style={{cursor: 'pointer'}} onClick={(e) => {e.stopPropagation(); this.updateOptions(id);}}>&#9662;</span>
           </div>
         </div>
         <div style={this.state.openOptions === id ? channelStyle.options : channelStyle.hiddenOptions}>
           <button style={channelStyle.button} onClick={() => (Object.keys(this.props.measures).length > 1) ? this.removeMeasure(id) : {} }>delete</button>
-         {/* <button style={channelStyle.button} onClick={() => this.renameMeasure(id) }>rename</button> */}
           { this.state.showMeasureRenameBox ? <input type="text" style={channelStyle.input} value={measure.name} onChange={this.handleMeasureRename}></input> : null } 
         </div>
       </div>
     )
-  },
-  repeatSymbol: function (props) {
-    var index = this.props.nextLoop.indexOf(props.id)
-    if (index > -1){
-      return (
-        <img src='../assets/png/repeatBlue.png' alt='repeat' style={channelStyle.repeatBlue} onClick={(e) => {e.stopPropagation(); this.props.toggleNextLoop(props.id)}}/>
-      )
-    } else {
-      return (
-        <img src='../assets/png/repeatWhite.png' alt='repeat' style={channelStyle.repeatBlue} onClick={(e) => {e.stopPropagation(); this.props.toggleNextLoop(props.id)}}/>
-      )
-    }  
   },
   playSample: function (e, name) {
     e.stopPropagation()

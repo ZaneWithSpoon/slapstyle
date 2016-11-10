@@ -79,6 +79,7 @@ for (var i = 0; i < 8*4; i++)
 
 var Main = React.createClass({
   render: function() {
+    //console.log(this.state)
     return (
       <site style={containerStyle}>
       <div class="g-hangout" data-render="createhangout"></div>
@@ -204,7 +205,7 @@ var Main = React.createClass({
   componentDidMount: function() {
     //load initial instruments
     audio.startup()
-    this.loadInstrument('vibraphone')
+    //this.loadInstrument('vibraphone')
 
     if (!this.state.isLoggedIn) {
       //loads usr profile from cookies
@@ -463,14 +464,48 @@ var Main = React.createClass({
       loops.push(data.measures[i].hmid)
     }
 
+    var focusId = data.measures[0].hmid
+
+    // console.log(channels)
+    // console.log(measures)
+    // console.log(focusId)
+
+    // channels = {
+    //   'bullshit': {
+    //     id: 'bullshit',
+    //     name: 'sumthing',
+    //     position: 0,
+    //     sampletype:'drums'
+    //   }
+    // }
+
+    // var notes = []
+    // for(var i = 0; i < 32; i++){
+    //   notes.push([])
+    // }
+
+    // measures = {
+    //   'firstInBullshit': {
+    //     channelid: 'bullshit',
+    //     hmid: 'firstInBullshit',
+    //     name:'firstInBullshit',
+    //     notes: notes,
+    //     position: 0,
+    //     sampletype: 'drums'
+    //   }
+    // }
+
+    // var focusId = 'firstInBullshit'
+    console.log("about to change songs")
     this.setState({
       channels: channels, 
       measures: measures, 
-      focusId: data.measures[0].hmid,
+      focusId: focusId,
       songName: data.song.name,
-      thisLoop: loops.slice(),
-      nextLoop: loops.slice()
+      thisLoop: loops,
+      nextLoop: loops
     })
+
   },
   loadInstrument: function(instrument) {
     var newWaiting = this.state.waitingInstruments.slice()
